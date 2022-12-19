@@ -1,16 +1,16 @@
-﻿namespace Day04;
+﻿namespace AdventOfCode.Solutions;
 
-internal static class Program
+internal sealed class Day04Solution : SolutionBase
 {
-    private static void Main()
-    {
-        List<(SectionRange, SectionRange)> ranges = File.ReadAllLines("input.txt").Select(ConvertToRanges).ToList();
-        int count1 = ranges.Count(OneFullyContainsOther);
-        int count2 = ranges.Count(RangesOverlap);
+    protected override SolutionResult Solve(IReadOnlyList<string> input) =>
+        Solve(input.Select(ConvertToRanges).ToList());
 
-        Console.WriteLine($"1/2 Number of Fully Contained Ranges: {count1}");
-        Console.WriteLine($"2/2 Number of Overlapping Ranges: {count2}");
-    }
+    private static SolutionResult Solve(List<(SectionRange, SectionRange)> ranges) =>
+        BuildResult(ranges.Count(OneFullyContainsOther), ranges.Count(RangesOverlap));
+
+    private static SolutionResult BuildResult(int count1, int count2) =>
+        ($"Number of Fully Contained Ranges: {count1}",
+            $"Number of Overlapping Ranges: {count2}");
 
     private static bool OneFullyContainsOther((SectionRange A, SectionRange B) value) =>
         OneFullyContainsOther(value.A, value.B);

@@ -1,21 +1,23 @@
-﻿namespace Day06;
+﻿namespace AdventOfCode.Solutions;
 
-internal static class Program
+internal sealed class Day06Solution : SolutionBase
 {
-    private static void Main()
-    {
-        string sequence = File.ReadAllText("input.txt");
+    protected override SolutionResult Solve(IReadOnlyList<string> input) =>
+        Solve(input.Single());
 
-        int position1 = new Scanner(4).Scan(sequence);
-        int position2 = new Scanner(14).Scan(sequence);
+    private static SolutionResult BuildResult(int position1, int position2) =>
+        ($"First Marker after {position1} characters.",
+            $"First Message after {position2} characters.");
 
-        Console.WriteLine($"1/2 First Marker after {position1} characters.");
-        Console.WriteLine($"2/2 First Message after {position2} characters.");
-    }
+    private static SolutionResult Solve(string sequence) =>
+        BuildResult(Scan(sequence, 4), Scan(sequence, 14));
+
+    private static int Scan(string sequence, int headerLength) =>
+        new Scanner(headerLength).Scan(sequence);
 
     private sealed class Scanner
     {
-        private int _length;
+        private readonly int _length;
         
         private readonly Queue<char> _values;
 

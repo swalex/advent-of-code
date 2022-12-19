@@ -1,17 +1,14 @@
-﻿namespace Day03;
+﻿namespace AdventOfCode.Solutions;
 
-internal static class Program
+internal sealed class Day03Solution : SolutionBase
 {
-    private static void Main()
-    {
-        string[] lines = File.ReadAllLines("input.txt");
+    protected override SolutionResult Solve(IReadOnlyList<string> input) =>
+        BuildResult(input.Select(FindDuplicateItem).Select(GetItemScore).Sum(),
+            input.Chunk(3).Select(FindBadge).Select(GetItemScore).Sum());
 
-        int score1 = lines.Select(FindDuplicateItem).Select(GetItemScore).Sum();
-        int score2 = lines.Chunk(3).Select(FindBadge).Select(GetItemScore).Sum();
-
-        Console.WriteLine($"1/2 Sum of Priorities of Duplicate Items: {score1}");
-        Console.WriteLine($"2/2 Sum of Priorities of Group Badges: {score2}");
-    }
+    private static SolutionResult BuildResult(int score1, int score2) =>
+        ($"Sum of Priorities of Duplicate Items: {score1}",
+            $"Sum of Priorities of Group Badges: {score2}");
 
     private static char FindDuplicateItem(string line) =>
         SplitAndFindDuplicateItem(line, line.Length / 2);
@@ -32,9 +29,10 @@ internal static class Program
         new(rucksack);
 
     private static int GetItemScore(char item) =>
-        item is >= 'a' and <= 'z'
-            ? item - 'a' + 1
-            : item is >= 'A' and <= 'Z'
-                ? item - 'A' + 27
-                : throw new ArgumentOutOfRangeException(nameof(item), item, null);
+        item switch
+        {
+            >= 'a' and <= 'z' => item - 'a' + 1,
+            >= 'A' and <= 'Z' => item - 'A' + 27,
+            _ => throw new ArgumentOutOfRangeException(nameof(item), item, null)
+        };
 }

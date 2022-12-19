@@ -1,0 +1,3 @@
+﻿using AdventOfCode;
+
+AvailableSolutions.SolveLatest();

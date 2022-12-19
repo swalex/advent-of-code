@@ -1,15 +1,13 @@
-﻿namespace Day02;
+﻿namespace AdventOfCode.Solutions;
 
-internal static class Program
+internal sealed class Day02Solution : SolutionBase
 {
-    private static void Main()
-    {
-        string[] lines = File.ReadAllLines("input.txt");
-        int score1 = lines.Select(DetermineScore1).Sum();
-        int score2 = lines.Select(DetermineScore2).Sum();
-        Console.WriteLine($"1/2 Total Score with Rock/Paper/Scissors Mapping: {score1}");
-        Console.WriteLine($"2/2 Total Score with Lose/Draw/Win Mapping: {score2}");
-    }
+    protected override SolutionResult Solve(IReadOnlyList<string> input) =>
+        BuildResult(input.Select(DetermineScore1).Sum(), input.Select(DetermineScore2).Sum());
+
+    private static SolutionResult BuildResult(int score1, int score2) =>
+        ($"Total Score with Rock/Paper/Scissors Mapping: {score1}",
+            $"Total Score with Lose/Draw/Win Mapping: {score2}");
 
     private static int DetermineScore1(string line) =>
         DetermineScore1(line[0], line[2]);
@@ -100,7 +98,7 @@ internal static class Program
             Result.Won => 6,
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
-    
+
     private enum Choice
     {
         Rock,

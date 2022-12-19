@@ -1,32 +1,40 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Day05;
+namespace AdventOfCode.Solutions;
 
-internal static partial class Program
+internal sealed partial class Day05Solution : SolutionBase
 {
     private static readonly Regex MoveExpression = MoveRegex();
-    
-    private static void Main()
-    {
-        (List<Stack<char>> stacks1, List<Move> moves) = LoadSetup(File.ReadAllLines("input.txt").ToList());
-        List<Stack<char>> stacks2 = stacks1.Select(s => new Stack<char>(s.Reverse())).ToList();
 
-        foreach (Move move in moves)
+    protected override SolutionResult Solve(IReadOnlyList<string> input) =>
+        Solve(LoadSetup(input));
+
+    private SolutionResult Solve((List<Stack<char>> Stacks, List<Move> Moves) setup)
+    {
+        List<Stack<char>> stacks2 = setup.Stacks.Select(s => new Stack<char>(s.Reverse())).ToList();
+        
+        foreach (Move move in setup.Moves)
         {
-            ApplyMove1(move, stacks1);
+            ApplyMove1(move, setup.Stacks);
         }
 
-        foreach (Move move in moves)
+        foreach (Move move in setup.Moves)
         {
             ApplyMove2(move, stacks2);
         }
-        
-        var topCrates1 = new string(stacks1.Select(s => s.Peek()).ToArray());
-        var topCrates2 = new string(stacks2.Select(s => s.Peek()).ToArray());
-        
-        Console.WriteLine($"1/2 Top Crates when moved one by one: {topCrates1}");
-        Console.WriteLine($"2/2 Top Crates when moved all at once: {topCrates2}");
+
+        return BuildResult(ToString(setup.Stacks), ToString(stacks2));
     }
+
+    private static string ToString(IEnumerable<Stack<char>> sequence) =>
+        ToString(sequence.Select(s => s.Peek()));
+
+    private static string ToString(IEnumerable<char> sequence) =>
+        new(sequence.ToArray());
+    
+    private static SolutionResult BuildResult(string topCrates1, string topCrates2) =>
+        ($"Top Crates when moved one by one: {topCrates1}",
+            $"Top Crates when moved all at once: {topCrates2}");
 
     private static void ApplyMove1(Move move, IReadOnlyList<Stack<char>> stacks)
     {
@@ -48,10 +56,10 @@ internal static partial class Program
         while (buffer.Any()) stacks[move.To - 1].Push(buffer.Pop());
     }
 
-    private static (List<Stack<char>>, List<Move>) LoadSetup(List<string> lines) =>
+    private static (List<Stack<char>>, List<Move>) LoadSetup(IReadOnlyCollection<string> lines) =>
         LoadSetup(lines.IndexOf(string.Empty), lines);
 
-    private static (List<Stack<char>>, List<Move>) LoadSetup(int separator, List<string> lines) =>
+    private static (List<Stack<char>>, List<Move>) LoadSetup(int separator, IReadOnlyCollection<string> lines) =>
         (LoadStacks(lines.Take(separator).Reverse().ToList()), LoadMoves(lines.Skip(separator + 1)).ToList());
 
     private static IEnumerable<Move> LoadMoves(IEnumerable<string> lines) =>
