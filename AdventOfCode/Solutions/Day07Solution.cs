@@ -25,11 +25,23 @@ internal sealed partial class Day07Solution : SolutionBase
     private static bool IsSubDirectory(string line) =>
         line.StartsWith("dir ");
 
-    private static SolutionResult Solve(Directory directory)
+    private static SolutionResult Solve(Directory directory) =>
+        BuildResult(SumSmallDirectories(directory), SmallestLargeEnough(directory, 70000000, 30000000));
+
+    private static long SmallestLargeEnough(Directory directory, long totalSize, long requiredAvailableSpace)
     {
-        long size = Flatten(directory).Select(d => d.Size).Where(d => d <= 100000).Sum();
-        return ($"Sum of total directory sizes at most 100'000: {size}.", "Bar");
+        long freeSpace = totalSize - directory.Size;
+        long missingSpace = requiredAvailableSpace - freeSpace;
+
+        return Flatten(directory).Select(d => d.Size).OrderBy(s => s).First(s => s >= missingSpace);
     }
+
+    private static SolutionResult BuildResult(long smallSizeSum, long smallestLargeEnough) =>
+        ($"Sum of total directory sizes at most 100'000: {smallSizeSum}.",
+            $"Smallest directory size that is large enough: {smallestLargeEnough}.");
+
+    private static long SumSmallDirectories(Directory directory) =>
+        Flatten(directory).Select(d => d.Size).Where(d => d <= 100000).Sum();
 
     private static IEnumerable<Directory> Flatten(Directory root)
     {
