@@ -8,48 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="input\day01.txt" />
-      <Content Include="input\day01.txt">
+      <None Remove="input\*.txt" />
+      <Content Include="input\*.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <None Remove="input\day02.txt" />
-      <Content Include="input\day02.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="input\day03.txt" />
-      <Content Include="input\day03.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="input\day04.txt" />
-      <Content Include="input\day04.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="input\day05.txt" />
-      <Content Include="input\day05.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="input\day06.txt" />
-      <Content Include="input\day06.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="input\day07.txt" />
-      <Content Include="input\day07.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="input\day08.txt" />
-      <Content Include="input\day08.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="input\day09.txt" />
-      <Content Include="input\day09.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="test\day09-1.txt" />
-      <Content Include="test\day09-1.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="test\day09-2.txt" />
-      <Content Include="test\day09-2.txt">
+      <None Remove="test\*.txt" />
+      <Content Include="test\*.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
