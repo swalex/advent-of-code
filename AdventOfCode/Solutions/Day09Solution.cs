@@ -22,14 +22,16 @@ internal sealed class Day09Solution : SolutionBase
     private static SolutionResult Solve(List<Vector> moves)
     {
         Bounds bounds = ComputeBounds(moves);
-        RopeMap map = RopeMap.FromBounds(bounds);
+        RopeMap map1 = RopeMap.FromBounds(bounds, 2);
+        RopeMap map2 = RopeMap.FromBounds(bounds, 10);
 
         foreach (Vector move in moves)
         {
-            map.ProcessMove(move);
+            map1.ProcessMove(move);
+            map2.ProcessMove(move);
         }
 
-        return BuildResult(map.Visits, 0);
+        return BuildResult(map1.Visits, map2.Visits);
     }
 
     private static Vector ParseMove(string line) =>
@@ -48,39 +50,52 @@ internal sealed class Day09Solution : SolutionBase
             _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
         };
 
-    private static SolutionResult BuildResult(int tailPositions, int bar) =>
-        ($"The tail has visited {tailPositions} distinct positions.", "Bar");
+    private static SolutionResult BuildResult(int tail2Positions, int tail10Positions) =>
+        ($"The tail of 2-knot rope has visited {tail2Positions} distinct positions.",
+            $"The tail of 10-knot rope has visited {tail10Positions} distinct positions.");
 
     private sealed class RopeMap
     {
+        private readonly Position[] _knots;
+        
         private readonly bool[,] _visited;
 
-        private Position _headPosition;
-
-        private Position _tailPosition;
-
-        private RopeMap(Size s, Position p)
+        private RopeMap(Size s, Position p, int ropeLength)
         {
             _visited = new bool[s.Width + 1, s.Height + 1];
-            _tailPosition = _headPosition = p;
+            _knots = Enumerable.Range(0, ropeLength).Select(_ => p).ToArray();
 
             MarkVisited(p);
         }
 
         internal int Visits { get; private set; }
 
-        internal static RopeMap FromBounds(Bounds b) =>
-            new(b.Size, -b.TopLeft);
+        private Position HeadPosition
+        {
+            get => _knots[0];
+            set => _knots[0] = value;
+        }
+
+        internal static RopeMap FromBounds(Bounds b, int ropeLength) =>
+            new(b.Size, -b.TopLeft, ropeLength);
 
         internal void ProcessMove(Vector move) =>
             ProcessMove(move.Direction, move.Length);
 
-        private void DragTail() =>
-            DragTail(_headPosition - _tailPosition);
-
-        private void DragTail(Vector delta)
+        private void DragTail()
         {
-            if (delta.Length > 1) MarkVisited(_tailPosition += delta.Direction);
+            for (var i = 1; i < _knots.Length; i++)
+            {
+                DragTail(i, _knots[i - 1] - _knots[i]);
+            }
+        }
+
+        private void DragTail(int knot, Vector delta)
+        {
+            if (delta.Length <= 1) return;
+
+            _knots[knot] += delta.Direction;
+            if (knot == _knots.Length - 1) MarkVisited(_knots[knot]);
         }
 
         private void MarkVisited(Position p)
@@ -95,7 +110,7 @@ internal sealed class Day09Solution : SolutionBase
         {
             for (var i = 0; i < length; i++)
             {
-                _headPosition += direction;
+                HeadPosition += direction;
                 DragTail();
             }
         }

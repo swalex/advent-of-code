@@ -14,7 +14,7 @@ internal abstract class SolutionBase
 
     private IEnumerable<string> TestFiles =>
         Directory.Exists("test")
-            ? Directory.EnumerateFiles("test", $"{Key.ToLowerInvariant()}*.txt")
+            ? Directory.EnumerateFiles("test", $"{Key.ToLowerInvariant()}*.txt").OrderBy(f => f)
             : Array.Empty<string>();
 
     internal void Solve()
