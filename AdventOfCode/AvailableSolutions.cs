@@ -8,23 +8,12 @@ internal static class AvailableSolutions
     {
         foreach (SolutionBase solution in AllSolutions)
         {
-            Solve(solution);
+            solution.Solve();
         }
     }
 
     internal static void SolveLatest() =>
-        Solve(AllSolutions.Last());
-
-    private static void Solve(SolutionBase solution) =>
-        WriteToConsole(solution, solution.Solve());
-
-    private static void WriteToConsole(SolutionBase solution, SolutionResult result)
-    {
-        Console.WriteLine($"{solution.Key} Solution Results:");
-        Console.WriteLine($"1/2 {result.FirstSolution}");
-        Console.WriteLine($"2/2 {result.SecondSolution}");
-        Console.WriteLine();
-    }
+        AllSolutions.Last().Solve();
 
     private static IEnumerable<SolutionBase> GetAllSolutions(Type baseType) =>
         baseType.Assembly
