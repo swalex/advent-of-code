@@ -19,23 +19,34 @@ internal sealed class Day08Solution : SolutionBase
         // heightMap.Export("trees.txt");
         VisibilityMap visibilityMap = VisibilityMap.FromHeightMap(heightMap);
         // visibilityMap.Export("view.txt");
+        ViewDistanceMaps distanceMaps = ViewDistanceMaps.FromHeightMap(heightMap);
+        // distanceMaps.Export("dist.txt");
 
-        var visible1 = 0;
+        var visible = 0;
         
         for (var y = 0; y < heightMap.Height; ++y)
         {
             for (var x = 0; x < heightMap.Width; ++x)
             {
-                if (visibilityMap.IsVisible(x, y, heightMap[x, y])) ++visible1;
+                if (visibilityMap.IsVisible(x, y, heightMap[x, y])) ++visible;
             }
         }
 
-        return BuildResult(visible1, visible1);
+        var bestScore = 0;
+        for (var y = 0; y < heightMap.Height; ++y)
+        {
+            for (var x = 0; x < heightMap.Width; ++x)
+            {
+                bestScore = Math.Max(distanceMaps.GetScore(x, y, heightMap[x, y]), bestScore);
+            }
+        }
+        
+        return BuildResult(visible, bestScore);
     }
 
-    private static (string, string) BuildResult(int visible1, int visible2) =>
-        ($"Trees visible from the outside: {visible1}",
-            $"Bar {visible2}");
+    private static (string, string) BuildResult(int visible, int bestScenicScore) =>
+        ($"Trees visible from the outside: {visible}",
+            $"Highest possible scenic score: {bestScenicScore}");
 
     private static HeightMap BuildMap(IReadOnlyList<string> input)
     {
@@ -64,8 +75,6 @@ internal sealed class Day08Solution : SolutionBase
         private readonly HeightMap _south;
 
         private readonly HeightMap _west;
-
-        private readonly HeightMap _merged;
         
         private VisibilityMap(int width, int height)
         {
@@ -73,7 +82,6 @@ internal sealed class Day08Solution : SolutionBase
             _north = new HeightMap(width, height);
             _south = new HeightMap(width, height);
             _west = new HeightMap(width, height);
-            _merged = new HeightMap(width, height);
         }
 
         internal static VisibilityMap FromHeightMap(HeightMap map)
@@ -95,21 +103,10 @@ internal sealed class Day08Solution : SolutionBase
                 }
             }
 
-            for (var y = 0; y < map.Height; y++)
-            {
-                for (var x = 0; x < map.Width; x++)
-                {
-                    visibility._merged.SetHeight(x, y,
-                        Math.Min(
-                            Math.Min(Math.Min(visibility._east[x, y], visibility._west[x, y]), visibility._south[x, y]),
-                            visibility._north[x, y]));
-                }
-            }
-
             return visibility;
         }
 
-        internal bool IsVisible(int x, int y, sbyte height) =>
+        internal bool IsVisible(int x, int y, int height) =>
             _west[x - 1, y] < height ||
             _east[x + 1, y] < height ||
             _north[x, y - 1] < height ||
@@ -123,23 +120,116 @@ internal sealed class Day08Solution : SolutionBase
             _south.Export("south_" + path);
         }
     }
+
+    private sealed class ViewDistanceMaps
+    {
+        private readonly ViewDistanceMap[] _maps = new ViewDistanceMap[10];
+        
+        private ViewDistanceMaps()
+        {
+        }
+
+        internal static ViewDistanceMaps FromHeightMap(HeightMap heightMap)
+        {
+            var maps = new ViewDistanceMaps();
+            for (var i = 0; i < maps._maps.Length; i++)
+            {
+                maps._maps[i] = ViewDistanceMap.FromHeightMap(heightMap, i);
+            }
+
+            return maps;
+        }
+
+        internal void Export(string path)
+        {
+            foreach (ViewDistanceMap map in _maps)
+            {
+                map.Export(path);
+            }
+        }
+
+        internal int GetScore(int x, int y, int height) =>
+            _maps[height].GetScore(x, y, height);
+    }
+    
+    private sealed class ViewDistanceMap
+    {
+        private readonly int _targetHeight;
+        
+        private readonly HeightMap _east;
+        
+        private readonly HeightMap _north;
+
+        private readonly HeightMap _south;
+
+        private readonly HeightMap _west;
+        
+        private ViewDistanceMap(int width, int height, int targetHeight)
+        {
+            _targetHeight = targetHeight;
+            _east = new HeightMap(width, height);
+            _north = new HeightMap(width, height);
+            _south = new HeightMap(width, height);
+            _west = new HeightMap(width, height);
+        }
+
+        internal static ViewDistanceMap FromHeightMap(HeightMap map, int targetHeight)
+        {
+            var distance = new ViewDistanceMap(map.Width, map.Height, targetHeight);
+
+            for (var ny = 0; ny < map.Height; ++ny)
+            {
+                int sy = map.Height - ny - 1;
+                
+                for (var wx = 0; wx < map.Width; ++wx)
+                {
+                    int ex = map.Width - wx - 1;
+
+                    distance._west.SetHeight(wx, ny,
+                        map[wx - 1, ny] < targetHeight ? distance._west[wx - 1, ny] + 1 : 1);
+
+                    distance._east.SetHeight(ex, ny,
+                        map[ex + 1, ny] < targetHeight ? distance._east[ex + 1, ny] + 1 : 1);
+
+                    distance._north.SetHeight(wx, ny,
+                        map[wx, ny - 1] < targetHeight ? distance._north[wx, ny - 1] + 1 : 1);
+
+                    distance._south.SetHeight(wx, sy,
+                        map[wx, sy + 1] < targetHeight ? distance._south[wx, sy + 1] + 1 : 1);
+                }
+            }
+
+            return distance;
+        }
+
+        internal int GetScore(int x, int y, int height) =>
+            height == _targetHeight ? _west[x, y] * _east[x, y] * _north[x, y] * _south[x, y] : 0;
+
+        internal void Export(string path)
+        {
+            _west.Export($"west_{_targetHeight}_" + path);
+            _east.Export($"east_{_targetHeight}_" + path);
+            _north.Export($"north_{_targetHeight}_" + path);
+            _south.Export($"south_{_targetHeight}_" + path);
+        }
+    }
     
     private sealed class HeightMap
     {
-        private const sbyte Savanna = -1;
+        private const int Savanna = -1;
         
-        private readonly sbyte[,] _values;
+        private readonly int[,] _values;
 
         internal HeightMap(int width, int height)
         {
-            _values = new sbyte[Width = width, Height = height];
+            _values = new int[Width = width, Height = height];
         }
         
         internal int Height { get; }
         
         internal int Width { get; }
 
-        internal sbyte this[int x, int y] =>
+        internal int this[int x, int y] =>
             x >= 0 && x < Width && y >= 0 && y < Height ? _values[x, y] : Savanna;
 
         internal void Export(string path)
@@ -157,10 +247,10 @@ internal sealed class Day08Solution : SolutionBase
             }
         }
 
-        internal void SetHeight(int x, int y, sbyte height) =>
+        internal void SetHeight(int x, int y, int height) =>
             _values[x, y] = height;
         
-        private static char GetGlyph(sbyte value) =>
+        private static char GetGlyph(int value) =>
             value switch
             {
                 -1 => 'X',
@@ -174,7 +264,7 @@ internal sealed class Day08Solution : SolutionBase
                 7 => '▓',
                 8 => '▒',
                 9 => '░',
-                _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
+                _ => '▣'
             };
     }
 }
