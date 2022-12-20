@@ -2,6 +2,10 @@ namespace AdventOfCode.Solutions;
 
 internal sealed class Day13Solution : SolutionBase
 {
+    private static readonly ILogger ComparisonLog = NoLogger.Instance;
+    
+    private static readonly ILogger DumpLog = NoLogger.Instance;
+    
     private const int RightOrder = -1;
 
     private const int WrongOrder = 1;
@@ -16,38 +20,57 @@ internal sealed class Day13Solution : SolutionBase
             sum += Compare(i / 3 + 1, Load(input[i]), Load(input[i + 1])) ? i / 3 + 1 : 0;
         }
 
-        for (var i = 0; i < input.Count; i += 3)
+        DumpPackets(input);
+
+        IPacket[] dividerPackets =
         {
-            Console.WriteLine(Load(input[i]));
-            Console.WriteLine(Load(input[i + 1]));
-            Console.WriteLine();
-        }
+            Packet.LoadFrom("[[2]]"),
+            Packet.LoadFrom("[[6]]")
+        };
         
-        return BuildResult(sum);
+        List<IPacket> packets = input.Where(l => !string.IsNullOrEmpty(l)).Select(Load).ToList();
+        packets.AddRange(dividerPackets);
+        
+        packets.Sort();
+
+        int divider1 = packets.IndexOf(dividerPackets[0]) + 1;
+        int divider2 = packets.IndexOf(dividerPackets[1]) + 1;
+
+        return BuildResult(sum, divider1 * divider2);
     }
 
-    private static SolutionResult BuildResult(int sum) =>
-        ($"Sum of pairs in right order: {sum}", "Bar");
+    private static void DumpPackets(IReadOnlyList<string> input)
+    {
+        for (var i = 0; i < input.Count; i += 3)
+        {
+            DumpLog.WriteLine(Load(input[i]));
+            DumpLog.WriteLine(Load(input[i + 1]));
+            DumpLog.WriteLine();
+        }
+    }
+
+    private static SolutionResult BuildResult(int sum, int decoderKey) =>
+        ($"Sum of pairs in right order: {sum}", $"Decoder key: {decoderKey}");
 
     private static bool Compare(int index, IPacket left, IPacket right)
     {
-        Console.WriteLine($"== Pair {index} ==");
-        bool result = left.Compare(right, 0) <= 0;
+        ComparisonLog.WriteLine($"== Pair {index} ==");
+        bool result = left.CompareTo(right, 0) <= 0;
         
-        Console.WriteLine();
+        ComparisonLog.WriteLine();
         return result;
     }
 
     private static IPacket Load(string line) =>
         Packet.LoadFrom(line);
 
-    private interface IPacket
+    private interface IPacket : IComparable<IPacket>
     {
         void AddPacket(IPacket packet);
         
         void AddValue(int value);
         
-        int Compare(IPacket right, int indent);
+        int CompareTo(IPacket right, int indent);
     }
 
     private sealed class NoPacket : IPacket
@@ -65,8 +88,11 @@ internal sealed class Day13Solution : SolutionBase
         public void AddValue(int value) =>
             throw new InvalidOperationException();
 
-        public int Compare(IPacket right, int indent) =>
+        public int CompareTo(IPacket right, int indent) =>
             throw new InvalidOperationException();
+
+        public int CompareTo(IPacket? other) =>
+            other != null ? CompareTo(other, 0) : WrongOrder;
 
         public override string ToString() =>
             "X";
@@ -91,39 +117,42 @@ internal sealed class Day13Solution : SolutionBase
         public void AddValue(int value) =>
             _values.Add(new Integer(value));
 
-        public int Compare(IPacket right, int indent)
+        public int CompareTo(IPacket? other) =>
+            other != null ? CompareTo(other, 0) : WrongOrder;
+        
+        public int CompareTo(IPacket right, int indent)
         {
             if (right is not Packet packet)
             {
-                Console.Write(new string(' ', indent * 2));
-                Console.WriteLine($"- Compare {this} vs {right}");
+                ComparisonLog.Write(new string(' ', indent * 2));
+                ComparisonLog.WriteLine($"- Compare {this} vs {right}");
                 indent++;
 
-                Console.Write(new string(' ', indent * 2));
+                ComparisonLog.Write(new string(' ', indent * 2));
                 right = packet = new Packet(right);
-                Console.WriteLine($"- Mixed types; convert right to {right} and retry comparison");
+                ComparisonLog.WriteLine($"- Mixed types; convert right to {right} and retry comparison");
             }
 
-            Console.Write(new string(' ', indent * 2));
-            Console.WriteLine($"- Compare {this} vs {right}");
+            ComparisonLog.Write(new string(' ', indent * 2));
+            ComparisonLog.WriteLine($"- Compare {this} vs {right}");
 
             for (var i = 0; i < Math.Max(_values.Count, packet._values.Count); i++)
             {
                 if (i >= _values.Count)
                 {
-                    Console.Write(new string(' ', (indent + 1) * 2));
-                    Console.WriteLine("- Left side ran out of items, so inputs are in the right order");
+                    ComparisonLog.Write(new string(' ', (indent + 1) * 2));
+                    ComparisonLog.WriteLine("- Left side ran out of items, so inputs are in the right order");
                     return RightOrder;
                 }
 
                 if (i >= packet._values.Count)
                 {
-                    Console.Write(new string(' ', (indent + 1) * 2));
-                    Console.WriteLine("- Right side ran out of items, so inputs are not in the right order");
+                    ComparisonLog.Write(new string(' ', (indent + 1) * 2));
+                    ComparisonLog.WriteLine("- Right side ran out of items, so inputs are not in the right order");
                     return WrongOrder;
                 }
                 
-                int result = _values[i].Compare(packet._values[i], indent + 1);
+                int result = _values[i].CompareTo(packet._values[i], indent + 1);
                 if (result != 0) return result;
             }
 
@@ -192,39 +221,42 @@ internal sealed class Day13Solution : SolutionBase
             public void AddValue(int value) =>
                 throw new InvalidOperationException();
 
-            public int Compare(IPacket right, int indent) =>
+            public int CompareTo(IPacket? other) =>
+                other != null ? CompareTo(other, 0) : WrongOrder;
+
+            public int CompareTo(IPacket right, int indent) =>
                 right is Integer rightValue
                     ? Compare(Value, rightValue.Value, indent)
                     : ConvertAndCompare(right, indent);
 
             private int ConvertAndCompare(IPacket right, int indent)
             {
-                Console.Write(new string(' ', indent * 2));
-                Console.WriteLine($"- Compare {this} vs {right}");
+                ComparisonLog.Write(new string(' ', indent * 2));
+                ComparisonLog.WriteLine($"- Compare {this} vs {right}");
                 indent++;
                 
-                Console.Write(new string(' ', indent * 2));
+                ComparisonLog.Write(new string(' ', indent * 2));
                 IPacket left = new Packet(this);
-                Console.WriteLine($"- Mixed types; convert left to {left} and retry comparison");
-                return left.Compare(right, indent);
+                ComparisonLog.WriteLine($"- Mixed types; convert left to {left} and retry comparison");
+                return left.CompareTo(right, indent);
             }
 
             private static int Compare(int left, int right, int indent)
             {
-                Console.Write(new string(' ', indent * 2));
-                Console.WriteLine($"- Compare {left} vs {right}");
+                ComparisonLog.Write(new string(' ', indent * 2));
+                ComparisonLog.WriteLine($"- Compare {left} vs {right}");
 
                 if (left == right) return Equal;
 
-                Console.Write(new string(' ', (indent + 1) * 2));
+                ComparisonLog.Write(new string(' ', (indent + 1) * 2));
 
                 if (left < right)
                 {
-                    Console.WriteLine("- Left side is smaller, so inputs are in the right order");
+                    ComparisonLog.WriteLine("- Left side is smaller, so inputs are in the right order");
                     return RightOrder;
                 }
                
-                Console.WriteLine("- Right side is smaller, so inputs are not in the right order");
+                ComparisonLog.WriteLine("- Right side is smaller, so inputs are not in the right order");
                 return WrongOrder;
 
             }
