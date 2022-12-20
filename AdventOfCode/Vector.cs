@@ -5,6 +5,9 @@ internal readonly record struct Vector(int X, int Y)
     internal Vector Direction =>
         Normalize(Length);
 
+    internal int CoarseLength =>
+        Math.Abs(X) + Math.Abs(Y);
+
     internal int Length =>
         (int)FloatLength;
 
