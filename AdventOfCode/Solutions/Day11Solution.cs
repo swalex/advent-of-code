@@ -3,14 +3,17 @@ namespace AdventOfCode.Solutions;
 internal sealed class Day11Solution : SolutionBase
 {
     protected override SolutionResult Solve(IReadOnlyList<string> input) =>
-        Solve(BuildMonkeys(input).ToList());
+        Solve(input, new MonkeyBuilder());
 
-    private static SolutionResult BuildResult(int businessLevel, int bar) =>
-        ($"Level of Monkey Business after 20 Rounds: {businessLevel}", "Bar");
+    private static SolutionResult Solve(IEnumerable<string> input, MonkeyBuilder builder) =>
+        Solve(BuildMonkeys(input, builder).ToList(), builder);
 
-    private static IEnumerable<Monkey> BuildMonkeys(IEnumerable<string> input)
+    private static SolutionResult BuildResult(long easyBusinessLevel, long panicBusinessLevel) =>
+        ($"Relaxed level of Monkey Business after 20 Rounds: {easyBusinessLevel}",
+            $"Panic level of Monkey Business after 10000 Rounds: {panicBusinessLevel}");
+
+    private static IEnumerable<Monkey> BuildMonkeys(IEnumerable<string> input, MonkeyBuilder builder)
     {
-        var builder = new MonkeyBuilder();
         foreach (string line in input)
         {
             if (builder.FeedInput(line)) yield return builder.BuildMonkey();
@@ -19,76 +22,102 @@ internal sealed class Day11Solution : SolutionBase
         yield return builder.BuildMonkey();
     }
 
-    private static SolutionResult Solve(List<Monkey> monkeys)
+    private static SolutionResult Solve(IReadOnlyList<Monkey> monkeys, MonkeyBuilder builder) =>
+        Solve(monkeys, builder.CommonDivisor);
+    
+    private static SolutionResult Solve(IReadOnlyList<Monkey> monkeys, long commonDivisor) =>
+        BuildResult(CalculateMonkeyBusiness(monkeys.Select(m => m.Clone()).ToList(), stress => stress / 3, 20),
+            CalculateMonkeyBusiness(monkeys, stress => stress % commonDivisor, 10000));
+
+    private static long CalculateMonkeyBusiness(IReadOnlyList<Monkey> monkeys, Func<long, long> relax, int iterations)
     {
-        for (var round = 0; round < 20; round++)
+        for (var round = 1; round <= iterations; round++)
         {
             foreach (Monkey monkey in monkeys)
             {
-                monkey.InspectItemsAndThrowTo(monkeys);
+                monkey.InspectItemsAndThrowTo(monkeys, relax);
             }
+
+            if (ShouldDump(round)) Dump(round, monkeys);
         }
 
-        List<int> capos = monkeys.Select(m => m.PerformedInspections).OrderByDescending(i => i).Take(2).ToList();
+        List<long> capos = monkeys.Select(m => m.PerformedInspections).OrderByDescending(i => i)
+            .Take(2)
+            .ToList();
 
-        return BuildResult(capos[0] * capos[1], 0);
+        return capos[0] * capos[1];
     }
+
+    private static void Dump(int round, IEnumerable<Monkey> monkeys)
+    {
+        Console.WriteLine($"== After round {round} ==");
+        foreach (Monkey monkey in monkeys) Console.WriteLine(monkey);
+
+        Console.WriteLine();
+    }
+
+    private static bool ShouldDump(int round) =>
+        round is 1 or 20 || round % 1000 == 0;
 
     private sealed class Monkey
     {
-        private readonly Queue<int> _items = new();
+        private readonly Queue<long> _items = new();
 
-        private readonly Func<int, int> _operation;
+        private readonly MonkeySetup _setup;
 
-        private readonly Func<int, bool> _test;
-
-        private readonly int _positiveTarget;
-
-        private readonly int _negativeTarget;
-
-        internal Monkey(Func<int, int> operation, Func<int, bool> test, int positiveTarget, int negativeTarget,
-            IEnumerable<int> items)
+        internal Monkey(MonkeySetup setup, IEnumerable<long> items)
         {
-            foreach (int item in items)
+            foreach (long item in items)
             {
                 _items.Enqueue(item);
             }
 
-            _operation = operation ?? throw new ArgumentNullException(nameof(operation));
-            _test = test ?? throw new ArgumentNullException(nameof(test));
-            _positiveTarget = positiveTarget;
-            _negativeTarget = negativeTarget;
+            _setup = setup;
         }
 
-        internal int PerformedInspections { get; private set; }
+        internal long PerformedInspections { get; private set; }
 
-        internal void InspectItemsAndThrowTo(IReadOnlyList<Monkey> monkeys)
+        public override string ToString() =>
+            $"Monkey {_setup.Id} inspected items {PerformedInspections} times.";
+
+        internal Monkey Clone() =>
+            new(_setup, _items);
+        
+        internal void InspectItemsAndThrowTo(IReadOnlyList<Monkey> monkeys, Func<long, long> relax)
         {
-            while (_items.TryDequeue(out int itemWorryLevel))
+            while (_items.TryDequeue(out long item))
             {
-                itemWorryLevel = _operation.Invoke(itemWorryLevel);
-                itemWorryLevel /= 3;
-                monkeys[GetTarget(itemWorryLevel)]._items.Enqueue(itemWorryLevel);
+                item = _setup.Operation?.Invoke(item) ?? item;
+                item = relax.Invoke(item);
+                ThrowTo(monkeys, _setup.GetTarget(item), item);
                 PerformedInspections++;
             }
         }
 
-        private int GetTarget(int itemWorryLevel) =>
-            _test.Invoke(itemWorryLevel) ? _positiveTarget : _negativeTarget;
+        private static void ThrowTo(IReadOnlyList<Monkey> monkeys, int target, long item) =>
+            monkeys[target]._items.Enqueue(item);
+    }
+
+    private readonly record struct MonkeySetup(
+        int Id,
+        Func<long, long>? Operation,
+        Func<long, bool>? Test,
+        int PositiveTarget,
+        int NegativeTarget)
+    {
+        internal int GetTarget(long itemWorryLevel) =>
+            Test?.Invoke(itemWorryLevel) == true ? PositiveTarget : NegativeTarget;
     }
 
     private sealed class MonkeyBuilder
     {
-        private readonly List<int> _items = new();
+        private readonly List<long> _items = new();
 
-        private int _currentId;
-
-        private int _currentStep;
+        private MonkeySetup _setup;
         
-        private Func<int,int>? _operation;
-        private Func<int,bool>? _test;
-        private int _positiveTarget;
-        private int _negativeTarget;
+        private int _currentStep;
+
+        internal long CommonDivisor { get; private set; } = 1;
 
         internal bool FeedInput(string line)
         {
@@ -115,31 +144,45 @@ internal sealed class Day11Solution : SolutionBase
         }
 
         private void LoadOperation(string line) =>
-            _operation = DecodeOperation(line.Replace("  Operation: new = old ", string.Empty).Split(' '));
-
-        private void LoadTest(string line) =>
-            _test = DecodeTest(int.Parse(line.Replace("  Test: divisible by ", string.Empty)));
-
-        private void LoadPositiveTarget(string line) =>
-            _positiveTarget = int.Parse(line.Replace("    If true: throw to monkey ", string.Empty));
-
-        private void LoadNegativeTarget(string line) =>
-            _negativeTarget = int.Parse(line.Replace("    If false: throw to monkey ", string.Empty));
-
-        private static Func<int, bool> DecodeTest(int value) =>
-            stress => stress % value == 0;
-
-        private static Func<int, int> DecodeOperation(IReadOnlyList<string> parts) =>
-            old => DecodeOperator(parts[0])(old, DecodeOperand(parts[1])(old));
-
-        private static Func<int, int> DecodeOperand(string value) =>
-            value switch
+            _setup = _setup with
             {
-                "old" => old => old,
-                _ => _ => int.Parse(value)
+                Operation = DecodeOperation(line.Replace("  Operation: new = old ", string.Empty).Split(' '))
             };
 
-        private static Func<int, int, int> DecodeOperator(string value) =>
+        private void LoadTest(string line) =>
+            _setup = _setup with
+            {
+                Test = DecodeTest(long.Parse(line.Replace("  Test: divisible by ", string.Empty)))
+            };
+
+        private void LoadPositiveTarget(string line) =>
+            _setup = _setup with
+            {
+                PositiveTarget = int.Parse(line.Replace("    If true: throw to monkey ", string.Empty))
+            };
+
+        private void LoadNegativeTarget(string line) =>
+            _setup = _setup with
+            {
+                NegativeTarget = int.Parse(line.Replace("    If false: throw to monkey ", string.Empty))
+            };
+
+        private Func<long, bool> DecodeTest(long value)
+        {
+            CommonDivisor *= value;
+            return stress => stress % value == 0;
+        }
+
+        private static Func<long, long> DecodeOperation(IReadOnlyList<string> parts) =>
+            old => DecodeOperator(parts[0])(old, DecodeOperand(parts[1])(old));
+
+        private static Func<long, long> DecodeOperand(string value) =>
+            value == "old" ? old => old : Constant(long.Parse(value));
+
+        private static Func<long, long> Constant(long value) =>
+            _ => value;
+
+        private static Func<long, long, long> DecodeOperator(string value) =>
             value switch
             {
                 "+" => (old, operand) => old + operand,
@@ -150,15 +193,20 @@ internal sealed class Day11Solution : SolutionBase
         private void LoadItems(string line) =>
             _items.AddRange(line.Replace("  Starting items: ", string.Empty)
                 .Split(',', StringSplitOptions.TrimEntries)
-                .Select(int.Parse));
+                .Select(long.Parse));
 
         internal Monkey BuildMonkey() =>
-            new(_operation!, _test!, _positiveTarget, _negativeTarget, _items);
+            BuildMonkey(_setup);
+
+        private Monkey BuildMonkey(MonkeySetup setup)
+        {
+            _setup = new MonkeySetup { Id = setup.Id + 1 };
+            return new(setup, _items);
+        }
 
         private void VerifyId(string line)
         {
-            if (line != $"Monkey {_currentId}:") throw new InvalidOperationException();
-            _currentId++;
+            if (line != $"Monkey {_setup.Id}:") throw new InvalidOperationException();
             _items.Clear();
         }
     }
