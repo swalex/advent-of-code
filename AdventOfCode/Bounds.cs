@@ -2,6 +2,11 @@ namespace AdventOfCode;
 
 internal readonly record struct Bounds(Position TopLeft, Position BottomRight)
 {
+    internal Bounds(Position position)
+        : this(position, position)
+    {
+    }
+    
     internal int Height =>
         BottomRight.Y - TopLeft.Y;
 
@@ -9,7 +14,7 @@ internal readonly record struct Bounds(Position TopLeft, Position BottomRight)
         BottomRight.X - TopLeft.X;
 
     internal Size Size =>
-        new(BottomRight - TopLeft);
+        new(BottomRight - TopLeft + Vector.One);
 
     public static Bounds operator +(Bounds b, Position p) =>
         new(Min(b.TopLeft, p), Max(b.BottomRight, p));

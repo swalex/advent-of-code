@@ -10,4 +10,7 @@ internal readonly record struct Position(int X, int Y)
     
     public static Position operator +(Position p, Vector v) =>
         new(p.X + v.X, p.Y + v.Y);
+
+    internal static Position Zero =>
+        default;
 }

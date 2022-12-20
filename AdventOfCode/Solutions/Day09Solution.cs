@@ -62,7 +62,7 @@ internal sealed class Day09Solution : SolutionBase
 
         private RopeMap(Size s, Position p, int ropeLength)
         {
-            _visited = new bool[s.Width + 1, s.Height + 1];
+            _visited = new bool[s.Width, s.Height];
             _knots = Enumerable.Range(0, ropeLength).Select(_ => p).ToArray();
 
             MarkVisited(p);

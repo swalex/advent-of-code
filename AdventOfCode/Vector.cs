@@ -2,6 +2,8 @@ namespace AdventOfCode;
 
 internal readonly record struct Vector(int X, int Y)
 {
+    internal static Vector One { get; } = new(1, 1);
+
     internal Vector Direction =>
         Normalize(Length);
 
@@ -14,6 +16,12 @@ internal readonly record struct Vector(int X, int Y)
     private float FloatLength =>
         MathF.Sqrt(X * X + Y * Y);
 
+    public static explicit operator Vector(Position p) =>
+        new(p.X, p.Y);
+
+    public static Vector operator +(Vector a, Vector b) =>
+        new(a.X + b.X, a.Y + b.Y);
+    
     public static Vector operator /(Vector v, float length) =>
         new((int)MathF.Round(v.X / length, MidpointRounding.AwayFromZero),
             (int)MathF.Round(v.Y / length, MidpointRounding.AwayFromZero));
