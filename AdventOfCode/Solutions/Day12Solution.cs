@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text;
 
 namespace AdventOfCode.Solutions;
@@ -10,13 +11,20 @@ internal sealed class Day12Solution : SolutionBase
         Console.WriteLine(map);
         Console.WriteLine(map.FindStart());
         Console.WriteLine(map.FindEnd());
-        List<Position> path = AStar(map).ToList();
+        List<Position> path = FindPath(map).ToList();
         Console.WriteLine(map.ToString(path));
-        return BuildResult(path.Count - 1, "Bar");
+
+        int shortestPath = map.FindLowlands()
+            .Select(p => FindPath(map, p).Count())
+            .Where(l => l > 0)
+            .MinBy(l => l);
+
+        return BuildResult(path.Count - 1, shortestPath - 1);
     }
 
-    private static SolutionResult BuildResult(int pathLength, string bar) =>
-        ($"Shortest Path Length: {pathLength}", bar);
+    private static SolutionResult BuildResult(int ownPathLength, int shortestPathLength) =>
+        ($"Shortest Own Path Length: {ownPathLength}",
+            $"Shortest Hiking Trail Length: {shortestPathLength}");
 
     private static IEnumerable<Position> ReconstructPath(IDictionary<Position, Position> cameFrom, Position current)
     {
@@ -30,11 +38,13 @@ internal sealed class Day12Solution : SolutionBase
         return path;
     }
 
-    private static IEnumerable<Position> AStar(HeightMap map)
+    private static IEnumerable<Position> FindPath(HeightMap map) =>
+        FindPath(map, map.FindStart());
+
+    private static IEnumerable<Position> FindPath(HeightMap map, Position start)
     {
         Vector[] directions = { Vector.Right(1), Vector.Down(1), Vector.Left(1), Vector.Up(1) };
         
-        Position start = map.FindStart();
         Position end = map.FindEnd();
         
         var openSet = new HashSet<Position> { start };
@@ -63,7 +73,7 @@ internal sealed class Day12Solution : SolutionBase
             }
         }
 
-        throw new InvalidOperationException();
+        return ImmutableArray<Position>.Empty;
     }
 
     private static int EstimateCost(Position from, Position to) =>
@@ -101,7 +111,7 @@ internal sealed class Day12Solution : SolutionBase
             _size = size;
             _cells = new char[size.Width, size.Height];
         }
-
+        
         public override string ToString() =>
             ToString(ArraySegment<Position>.Empty);
 
@@ -110,6 +120,17 @@ internal sealed class Day12Solution : SolutionBase
 
         internal Position FindStart() =>
             Find(c => c == 'S');
+
+        internal IEnumerable<Position> FindLowlands()
+        {
+            for (var y = 0; y < _size.Height; ++y)
+            {
+                for (var x = 0; x < _size.Width; ++x)
+                {
+                    if (_cells[x, y] is 'a' or 'S') yield return new Position(x, y);
+                }
+            }
+        }
 
         internal static HeightMap FromInput(IReadOnlyCollection<string> input)
         {
