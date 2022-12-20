@@ -7,21 +7,28 @@ internal sealed class Day14Solution : SolutionBase
     protected override SolutionResult Solve(IReadOnlyList<string> input)
     {
         List<Path> paths = input.Select(Path.Load).ToList();
-        var simulation = Simulation.Create(paths, new Position(500, 0));
+        var source = new Position(500, 0);
+        int restingUnitsWithoutFloor = Simulate(Simulation.CreateWithoutFloor(paths, source));
+        int restingUnitsWithFloor = Simulate(Simulation.CreateWithFloor(paths, source));
 
+        return ($"{restingUnitsWithoutFloor} units of sand came to rest without considering a floor.",
+            $"{restingUnitsWithFloor} units of sand came to rest after considering a floor.");
+    }
+
+    private static int Simulate(Simulation simulation)
+    {
         var restingUnits = 0;
         while (simulation.SpawnAndComeToRest()) ++restingUnits;
 
         Console.WriteLine(simulation);
-
-        return ($"{restingUnits} units of sand came to rest.", "Bar");
+        return restingUnits;
     }
 
     private sealed class Path
     {
         private readonly Position[] _points;
 
-        private Path(IEnumerable<Position> positions)
+        internal Path(IEnumerable<Position> positions)
         {
             _points = positions.ToArray();
         }
@@ -70,8 +77,6 @@ internal sealed class Day14Solution : SolutionBase
 
         private const char Source = '+';
 
-        private const char Void = ' ';
-
         private static readonly Vector Down = new Vector(0, 1);
 
         private static readonly Vector DownLeft = new Vector(-1, 1);
@@ -112,9 +117,14 @@ internal sealed class Day14Solution : SolutionBase
             return builder.ToString();
         }
 
-        internal static Simulation Create(IReadOnlyCollection<Path> paths, Position source)
+        internal static Simulation CreateWithoutFloor(IReadOnlyCollection<Path> paths, Position source) =>
+            CreateSimulation(paths, source, ComputeBounds(paths, source));
+
+        internal static Simulation CreateWithFloor(IReadOnlyCollection<Path> paths, Position source) =>
+            CreateSimulationWithFloor(paths, source, ComputeBounds(paths, source));
+
+        private static Simulation CreateSimulation(IEnumerable<Path> paths, Position source, Bounds bounds)
         {
-            Bounds bounds = paths.Aggregate(new Bounds(source), (current, path) => path.Extend(current));
             var simulation = new Simulation(bounds, source);
             simulation.Inflate();
 
@@ -122,8 +132,29 @@ internal sealed class Day14Solution : SolutionBase
             return simulation;
         }
 
+        private static Bounds ComputeBounds(IEnumerable<Path> paths, Position source) =>
+            paths.Aggregate(new Bounds(source), (current, path) => path.Extend(current));
+
+        private static Simulation CreateSimulationWithFloor(IEnumerable<Path> paths, Position source,
+            Bounds bounds) =>
+            CreateSimulation(AddFloor(paths, source, ref bounds), source, bounds);
+
+        private static IEnumerable<Path> AddFloor(IEnumerable<Path> paths, Position source, ref Bounds bounds)
+        {
+            List<Path> pathList = paths.ToList();
+            int y = bounds.Bottom + 2;
+            int halfWidth = bounds.Height + 2;
+            int l = source.X - halfWidth;
+            int r = source.X + halfWidth;
+            var floor = new Path(new[] { new Position(l, y), new Position(r, y) });
+            bounds = floor.Extend(bounds);
+            pathList.Add(floor);
+            return pathList;
+        }
+
         internal bool SpawnAndComeToRest()
         {
+            if (!IsCell(_source, Source)) return false;
             Position position = _source;
 
             while (TryGetDescendPosition(position, out position))
@@ -147,9 +178,6 @@ internal sealed class Day14Solution : SolutionBase
 
             SetCell(_source, Source);
         }
-
-        private static bool IsAir(char cell) =>
-            cell == '.';
 
         private void SetupRock(IEnumerable<Path> paths)
         {
@@ -176,7 +204,7 @@ internal sealed class Day14Solution : SolutionBase
                     return true;
                 }
 
-                if (!IsAir(newPosition)) continue;
+                if (!IsCell(newPosition, Air)) continue;
                 
                 descendPosition = newPosition;
                 return true;
@@ -185,8 +213,8 @@ internal sealed class Day14Solution : SolutionBase
             return false;
         }
 
-        private bool IsAir(Position position) =>
-            IsAir(_grid[position.X, position.Y]);
+        private bool IsCell(Position position, char type) =>
+            _grid[position.X, position.Y] == type;
 
         private bool IsVoid(Position position) =>
             position.X < 0 || position.X >= _size.Width ||

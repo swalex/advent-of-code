@@ -6,12 +6,24 @@ internal readonly record struct Bounds(Position TopLeft, Position BottomRight)
         : this(position, position)
     {
     }
-    
+
+    internal int Bottom =>
+        BottomRight.Y;
+
     internal int Height =>
-        BottomRight.Y - TopLeft.Y;
+        Bottom - Top + 1;
+
+    internal int Left =>
+        TopLeft.X;
+
+    internal int Right =>
+        BottomRight.X;
+
+    internal int Top =>
+        TopLeft.Y;
 
     internal int Width =>
-        BottomRight.X - TopLeft.X;
+        Right - Left + 1;
 
     internal Size Size =>
         new(BottomRight - TopLeft + Vector.One);
