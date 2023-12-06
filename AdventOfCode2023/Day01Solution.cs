@@ -1,3 +1,6 @@
+using System.Runtime.CompilerServices;
+[assembly:InternalsVisibleTo("AdventOfCode2023.Tests")]
+
 namespace AdventOfCode2023;
 
 internal static class Day01Solution
@@ -17,10 +20,22 @@ internal static class Day01Solution
         return SolveFirstPuzzle(digits);
     }
 
+    internal static int DumpSecondPuzzle(IReadOnlyList<string> input)
+    {
+        List<string> digits = input.Select(ConvertDigits).ToList();
+        for (var i = 0; i < digits.Count; i++)
+        {
+            Console.WriteLine($"{i:D4} {digits[i]} {input[i]}");
+        }
+
+        Console.WriteLine(string.Join(", ", digits));
+        return SolveFirstPuzzle(digits);
+    }
+
     internal static int SolveSecondPuzzle(IEnumerable<string> input) =>
         SolveFirstPuzzle(input.Select(ConvertDigits));
 
-    private static string ConvertDigits(string line)
+    internal static string ConvertDigits(string line)
     {
         List<string> replaced = Numbers.Select((n, i) => line.Replace(n, $"{i + 1}")).ToList();
 
@@ -31,14 +46,14 @@ internal static class Day01Solution
         return $"{first}{last}";
     }
 
-    private static char ScanLast(int maxLength, List<string> replaced)
+    private static char ScanLast(int maxLength, IReadOnlyList<string> replaced)
     {
         for (int i = 0; i < maxLength; i++)
         {
             for (int j = 0; j < replaced.Count; j++)
             {
-                int k = maxLength - i - 1;
-                if (k < replaced[j].Length && char.IsDigit(replaced[j][k]))
+                int k = replaced[j].Length - i - 1;
+                if (k >= 0 && char.IsDigit(replaced[j][k]))
                 {
                     return replaced[j][k];
                 }
@@ -48,9 +63,8 @@ internal static class Day01Solution
         return '0';
     }
 
-    private static char ScanFirst(int maxLength, List<string> replaced)
+    private static char ScanFirst(int maxLength, IReadOnlyList<string> replaced)
     {
-        char first;
         for (int i = 0; i < maxLength; i++)
         {
             for (int j = 0; j < replaced.Count; j++)
@@ -64,15 +78,6 @@ internal static class Day01Solution
 
         return '0';
     }
-
-    private static string ReplaceTextDigit(string current, string number) =>
-        current.Replace(number, AsDigit(number));
-
-    private static string AsDigit(string number) =>
-        AsIntegerDigit(number).ToString();
-
-    private static int AsIntegerDigit(string number) =>
-        Numbers.IndexOf(number) + 1;
 
     private static int BuildNumber(string line)
     {
