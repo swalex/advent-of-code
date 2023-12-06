@@ -86,6 +86,11 @@ internal sealed class Day02Solution : ISolution
 
         internal int Number { get; }
 
+        internal int Power =>
+            Takes.Select(t => t.Red).Max() *
+            Takes.Select(t => t.Green).Max() *
+            Takes.Select(t => t.Blue).Max();
+
         private IReadOnlyList<Take> Takes { get; }
 
         public override bool Equals(object? obj) =>

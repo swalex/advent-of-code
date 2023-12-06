@@ -13,6 +13,15 @@ public sealed class TestDay02Solution
 
     private static readonly string[] Test1InputLines = Test1Input.Split("\n");
 
+    public static IEnumerable<object[]> GetPowerCombinations()
+    {
+        yield return new object[] { Test1InputLines[0], 48 };
+        yield return new object[] { Test1InputLines[1], 12 };
+        yield return new object[] { Test1InputLines[2], 1560 };
+        yield return new object[] { Test1InputLines[3], 630 };
+        yield return new object[] { Test1InputLines[4], 36 };
+    }
+
     [Fact]
     public void TestInputLineCount() =>
         Assert.Equal(5, Test1InputLines.Length);
@@ -38,5 +47,14 @@ public sealed class TestDay02Solution
         int actual = Day02Solution.SolvePuzzle1(Test1InputLines, new Day02Solution.Take(12, 13, 14));
 
         Assert.Equal(8, actual);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetPowerCombinations))]
+    public void TestPowerOfGame3(string line, int expectedPower)
+    {
+        Day02Solution.Game actual = Day02Solution.Parse(line);
+
+        Assert.Equal(expectedPower, actual.Power);
     }
 }
