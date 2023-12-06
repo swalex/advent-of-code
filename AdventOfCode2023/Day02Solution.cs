@@ -67,7 +67,8 @@ internal sealed class Day02Solution : ISolution
     public void Solve()
     {
         string[] input = File.ReadAllLines("InputData/day02.txt");
-        Console.WriteLine($"Day  1 - Puzzle 1: {SolvePuzzle1(input, new Take(12, 13, 14))}");
+        Console.WriteLine($"Day  2 - Puzzle 1: {SolvePuzzle1(input, new Take(12, 13, 14))}");
+        Console.WriteLine($"Day  2 - Puzzle 2: {SolvePuzzle2(input)}");
     }
 
     internal static Game Parse(string line) =>
@@ -75,6 +76,9 @@ internal sealed class Day02Solution : ISolution
 
     internal static int SolvePuzzle1(IEnumerable<string> lines, Take limits) =>
         lines.Select(Parse).Where(g => g.IsPossible(limits)).Select(g => g.Number).Sum();
+
+    private static int SolvePuzzle2(IEnumerable<string> lines) =>
+        lines.Select(Parse).Select(g => g.Power).Sum();
 
     internal sealed class Game
     {
