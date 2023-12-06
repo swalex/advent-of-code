@@ -3,12 +3,29 @@ using System.Runtime.CompilerServices;
 
 namespace AdventOfCode2023;
 
-internal static class Day01Solution
+internal sealed class Day01Solution : ISolution
 {
     private static readonly List<string> Numbers = new()
     {
         "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
     };
+
+    private Day01Solution()
+    {
+    }
+
+    internal static ISolution Instance { get; } = new Day01Solution();
+
+    public void Solve()
+    {
+        string[] input = File.ReadAllLines("InputData/day01.txt");
+        Console.WriteLine($"Day  1 - Puzzle 1: {SolveFirstPuzzle(input)}");
+
+        string[] testData = File.ReadAllLines("InputData/day01.test2.txt");
+        Console.WriteLine($"Day  1 - Puzzle 2 (Test): {TestSecondPuzzle(testData)}");
+
+        Console.WriteLine($"Day  1 - Puzzle 2: {SolveSecondPuzzle(input)}");
+    }
 
     internal static int SolveFirstPuzzle(IEnumerable<string> input) =>
         input.Select(BuildNumber).Sum();

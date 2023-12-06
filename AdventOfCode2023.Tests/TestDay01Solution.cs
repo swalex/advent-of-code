@@ -1,9 +1,9 @@
 namespace AdventOfCode2023.Tests;
 
-public class TestDay01Solution
+public sealed class TestDay01Solution
 {
     [Fact]
-    public void TestFoo()
+    public void TestConvertDigits()
     {
         const string input = "eightjzqzhrllg1oneightfck";
 

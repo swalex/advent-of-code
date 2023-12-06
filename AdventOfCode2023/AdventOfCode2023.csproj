@@ -5,6 +5,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,6 +18,10 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <None Remove="InputData\day01-2.test.result.txt" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Superpower" Version="3.0.0" />
     </ItemGroup>
 
 </Project>
