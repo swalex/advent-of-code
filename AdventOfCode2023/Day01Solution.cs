@@ -10,10 +10,15 @@ internal static class Day01Solution
     internal static int SolveFirstPuzzle(IEnumerable<string> input) =>
         input.Select(BuildNumber).Sum();
 
-    internal static int SolveSecondPuzzle(IEnumerable<string> input)
+    internal static int TestSecondPuzzle(IEnumerable<string> input)
     {
-        return SolveFirstPuzzle(input.Select(ConvertDigits));
+        List<string> digits = input.Select(ConvertDigits).ToList();
+        Console.WriteLine(string.Join(", ", digits));
+        return SolveFirstPuzzle(digits);
     }
+
+    internal static int SolveSecondPuzzle(IEnumerable<string> input) =>
+        SolveFirstPuzzle(input.Select(ConvertDigits));
 
     private static string ConvertDigits(string line) =>
         Numbers.Aggregate(line, ReplaceTextDigit);
