@@ -18,6 +18,10 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <None Remove="InputData\day01-2.test.result.txt" />
+      <None Remove="InputData\day02.txt" />
+      <Content Include="InputData\day02.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>

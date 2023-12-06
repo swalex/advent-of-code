@@ -66,7 +66,8 @@ internal sealed class Day02Solution : ISolution
 
     public void Solve()
     {
-        throw new NotImplementedException();
+        string[] input = File.ReadAllLines("InputData/day02.txt");
+        Console.WriteLine($"Day  1 - Puzzle 1: {SolvePuzzle1(input, new Take(12, 13, 14))}");
     }
 
     internal static Game Parse(string line) =>
@@ -85,7 +86,7 @@ internal sealed class Day02Solution : ISolution
 
         internal int Number { get; }
 
-        internal IReadOnlyList<Take> Takes { get; }
+        private IReadOnlyList<Take> Takes { get; }
 
         public override bool Equals(object? obj) =>
             obj is Game other &&
