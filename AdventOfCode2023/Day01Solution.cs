@@ -20,8 +20,50 @@ internal static class Day01Solution
     internal static int SolveSecondPuzzle(IEnumerable<string> input) =>
         SolveFirstPuzzle(input.Select(ConvertDigits));
 
-    private static string ConvertDigits(string line) =>
-        Numbers.Aggregate(line, ReplaceTextDigit);
+    private static string ConvertDigits(string line)
+    {
+        List<string> replaced = Numbers.Select((n, i) => line.Replace(n, $"{i + 1}")).ToList();
+
+        int maxLength = replaced.Select(r => r.Length).Max();
+        char first = ScanFirst(maxLength, replaced);
+        char last = ScanLast(maxLength, replaced);
+
+        return $"{first}{last}";
+    }
+
+    private static char ScanLast(int maxLength, List<string> replaced)
+    {
+        for (int i = 0; i < maxLength; i++)
+        {
+            for (int j = 0; j < replaced.Count; j++)
+            {
+                int k = maxLength - i - 1;
+                if (k < replaced[j].Length && char.IsDigit(replaced[j][k]))
+                {
+                    return replaced[j][k];
+                }
+            }
+        }
+
+        return '0';
+    }
+
+    private static char ScanFirst(int maxLength, List<string> replaced)
+    {
+        char first;
+        for (int i = 0; i < maxLength; i++)
+        {
+            for (int j = 0; j < replaced.Count; j++)
+            {
+                if (i < replaced[j].Length && char.IsDigit(replaced[j][i]))
+                {
+                    return replaced[j][i];
+                }
+            }
+        }
+
+        return '0';
+    }
 
     private static string ReplaceTextDigit(string current, string number) =>
         current.Replace(number, AsDigit(number));
