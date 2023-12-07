@@ -64,21 +64,17 @@ internal sealed class Day02Solution : ISolution
         from takes in TakeParser.ManyDelimitedBy(Token.EqualTo(Tokens.Semicolon))
         select new Game(number, takes);
 
-    public void Solve()
-    {
-        string[] input = File.ReadAllLines("InputData/day02.txt");
-        Console.WriteLine($"Day  2 - Puzzle 1: {SolvePuzzle1(input, new Take(12, 13, 14))}");
-        Console.WriteLine($"Day  2 - Puzzle 2: {SolvePuzzle2(input)}");
-    }
+    public int Day =>
+        2;
+
+    public int SolveFirstPuzzle(IReadOnlyList<string> input) =>
+        input.Select(Parse).Where(g => g.IsPossible(new Take(12, 13, 14))).Select(g => g.Number).Sum();
+
+    public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
+        input.Select(Parse).Select(g => g.Power).Sum();
 
     internal static Game Parse(string line) =>
         GameParser.Parse(InputTokenizer.Tokenize(line));
-
-    internal static int SolvePuzzle1(IEnumerable<string> lines, Take limits) =>
-        lines.Select(Parse).Where(g => g.IsPossible(limits)).Select(g => g.Number).Sum();
-
-    private static int SolvePuzzle2(IEnumerable<string> lines) =>
-        lines.Select(Parse).Select(g => g.Power).Sum();
 
     internal sealed class Game
     {

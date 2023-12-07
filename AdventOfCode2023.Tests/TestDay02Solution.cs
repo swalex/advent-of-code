@@ -44,7 +44,8 @@ public sealed class TestDay02Solution
     [Fact]
     public void TestExample1()
     {
-        int actual = Day02Solution.SolvePuzzle1(Test1InputLines, new Day02Solution.Take(12, 13, 14));
+        Day02Solution.Take limits = new Day02Solution.Take(12, 13, 14);
+        int actual = Test1InputLines.Select(Day02Solution.Parse).Where(g => g.IsPossible(limits)).Select(g => g.Number).Sum();
 
         Assert.Equal(8, actual);
     }

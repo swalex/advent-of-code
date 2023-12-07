@@ -10,31 +10,20 @@ internal sealed class Day01Solution : ISolution
         "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
     };
 
-    private Day01Solution()
-    {
-    }
+    public int Day =>
+        1;
 
-    internal static ISolution Instance { get; } = new Day01Solution();
-
-    public void Solve()
-    {
-        string[] input = File.ReadAllLines("InputData/day01.txt");
-        Console.WriteLine($"Day  1 - Puzzle 1: {SolveFirstPuzzle(input)}");
-
-        string[] testData = File.ReadAllLines("InputData/day01.test2.txt");
-        Console.WriteLine($"Day  1 - Puzzle 2 (Test): {TestSecondPuzzle(testData)}");
-
-        Console.WriteLine($"Day  1 - Puzzle 2: {SolveSecondPuzzle(input)}");
-    }
-
-    internal static int SolveFirstPuzzle(IEnumerable<string> input) =>
+    public int SolveFirstPuzzle(IReadOnlyList<string> input) =>
         input.Select(BuildNumber).Sum();
+
+    public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
+        input.Select(ConvertDigits).Select(BuildNumber).Sum();
 
     internal static int TestSecondPuzzle(IEnumerable<string> input)
     {
         List<string> digits = input.Select(ConvertDigits).ToList();
         Console.WriteLine(string.Join(", ", digits));
-        return SolveFirstPuzzle(digits);
+        return digits.Select(BuildNumber).Sum();
     }
 
     internal static int DumpSecondPuzzle(IReadOnlyList<string> input)
@@ -46,11 +35,8 @@ internal sealed class Day01Solution : ISolution
         }
 
         Console.WriteLine(string.Join(", ", digits));
-        return SolveFirstPuzzle(digits);
+        return digits.Select(BuildNumber).Sum();
     }
-
-    internal static int SolveSecondPuzzle(IEnumerable<string> input) =>
-        SolveFirstPuzzle(input.Select(ConvertDigits));
 
     internal static string ConvertDigits(string line)
     {
