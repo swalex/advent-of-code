@@ -2,7 +2,7 @@ namespace AdventOfCode2023.Tests;
 
 public sealed class TestDay01Solution
 {
-    private static readonly string Example1Data =
+    private const string Example1Data =
         """
         1abc2
         pqr3stu8vwx
@@ -10,7 +10,7 @@ public sealed class TestDay01Solution
         treb7uchet
         """;
 
-    private static readonly string Example2Data =
+    private const string Example2Data =
         """
         two1nine
         eightwothree
