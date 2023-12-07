@@ -38,6 +38,16 @@ public sealed class TestDay03Solution
     }
 
     [Fact]
+    public void Solution2()
+    {
+        const int expected = 467835;
+
+        int actual = new Day03Solution().SolveSecondPuzzle(ExampleData.Lines());
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
     public void EnumerateNumbers()
     {
         const int expected = 10;
@@ -118,6 +128,15 @@ public sealed class TestDay03Solution
         List<Day03Solution.Map.Number> numbers = map.EnumerateNumbers().ToList();
 
         Assert.Equal(expectedValue, map.GetValue(numbers[index]));
+    }
+
+    [Fact]
+    public void EnumeratePotentialGears()
+    {
+        Day03Solution.Map map = Day03Solution.GetMap(ExampleData.Lines());
+        List<Point> gears = map.EnumeratePotentialGears().ToList();
+
+        Assert.Equal(3, gears.Count);
     }
 
     private static IEnumerable<(int Index, char Value, Point Position)> EnumerateCellTestData()

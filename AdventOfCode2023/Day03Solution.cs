@@ -10,11 +10,22 @@ public sealed class Day03Solution : ISolution
     public int SolveFirstPuzzle(IReadOnlyList<string> input)
     {
         Map map = GetMap(input);
-        return map.EnumerateNumbers().Where(map.IsPartNumber).Select(map.GetValue).Sum();
+        return map.EnumeratePartNumbers().Select(map.GetValue).Sum();
     }
 
-    public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        throw new NotImplementedException();
+    public int SolveSecondPuzzle(IReadOnlyList<string> input)
+    {
+        Map map = GetMap(input);
+        List<Point> potentialGears = map.EnumeratePotentialGears().ToList();
+        List<Map.Number> partNumbers = map.EnumeratePartNumbers().ToList();
+
+        List<List<Map.Number>> gearSets = potentialGears
+            .Select(gear => partNumbers.Where(number => number.IsAdjacentTo(gear)).ToList())
+            .Where(set => set.Count == 2)
+            .ToList();
+
+        return gearSets.Select(set => set.Select(map.GetValue).Aggregate(1, (a, b) => a * b)).Sum();
+    }
 
     internal static Map GetMap(IReadOnlyList<string> input) =>
         Map.FromLines(input);
@@ -33,6 +44,19 @@ public sealed class Day03Solution : ISolution
             _height = map.GetLength(0);
             _width = map.GetLength(1);
         }
+
+        internal IEnumerable<Point> EnumerateCells() =>
+            Enumerable.Range(0, _height)
+                .SelectMany(y => Enumerable.Range(0, _width).Select(x => new Point(x, y)));
+
+        internal IEnumerable<Number> EnumeratePartNumbers() =>
+            EnumerateNumbers().Where(IsPartNumber);
+
+        internal IEnumerable<Point> EnumeratePotentialGears() =>
+            EnumerateCells().Where(IsPotentialGear);
+
+        private bool IsPotentialGear(Point position) =>
+            GetValue(position) == '*';
 
         internal IEnumerable<Number> EnumerateNumbers()
         {
@@ -100,6 +124,9 @@ public sealed class Day03Solution : ISolution
         {
             internal IEnumerable<Point> EnumerateCells() =>
                 EnumerateCells(X - 1, Y - 1, Length + 2, 3);
+
+            internal bool IsAdjacentTo(Point point) =>
+                EnumerateCells().Contains(point);
 
             internal bool IsInside(Point point) =>
                 point.X >= X && point.X - X < Length && point.Y == Y;
