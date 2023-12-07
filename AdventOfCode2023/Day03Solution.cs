@@ -10,7 +10,7 @@ public sealed class Day03Solution : ISolution
     public int SolveFirstPuzzle(IReadOnlyList<string> input)
     {
         Map map = GetMap(input);
-        throw new NotImplementedException();
+        return map.EnumerateNumbers().Where(map.IsPartNumber).Select(map.GetValue).Sum();
     }
 
     public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
@@ -84,6 +84,14 @@ public sealed class Day03Solution : ISolution
 
         private static bool IsSymbol(char value) =>
             !char.IsDigit(value) && value != '.';
+
+        internal int GetValue(Number number) =>
+            number
+                .EnumerateCells()
+                .Where(number.IsInside)
+                .Select(GetValue)
+                .Select(c => c - '0')
+                .Aggregate(0, (a, b) => a * 10 + b);
 
         internal char GetValue(Point point) =>
             _map[point.Y, point.X];

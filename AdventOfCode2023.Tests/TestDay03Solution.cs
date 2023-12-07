@@ -24,6 +24,9 @@ public sealed class TestDay03Solution
     public static IEnumerable<object[]> EnumerateCellValueTestData() =>
         EnumerateCellTestData().Select(d => new object[] { d.Index, d.Value });
 
+    public static IEnumerable<object[]> EnumerateNumberValueTestData() =>
+        new []{467,114,35,633,617,58,592,755,664,598}.Select((v, i) => new object[] { i, v });
+
     [Fact]
     public void Solution1()
     {
@@ -105,6 +108,16 @@ public sealed class TestDay03Solution
         Day03Solution.Map map = Day03Solution.GetMap(ExampleData.Lines());
 
         Assert.Equal('#', map.GetValue(new Point(6, 3)));
+    }
+
+    [Theory]
+    [MemberData(nameof(EnumerateNumberValueTestData))]
+    public void GetNumberValue(int index, int expectedValue)
+    {
+        Day03Solution.Map map = Day03Solution.GetMap(ExampleData.Lines());
+        List<Day03Solution.Map.Number> numbers = map.EnumerateNumbers().ToList();
+
+        Assert.Equal(expectedValue, map.GetValue(numbers[index]));
     }
 
     private static IEnumerable<(int Index, char Value, Point Position)> EnumerateCellTestData()
