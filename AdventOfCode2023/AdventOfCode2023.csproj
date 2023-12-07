@@ -9,17 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="InputData\day01.txt" />
-      <Content Include="InputData\day01.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="InputData\day01-2.test.data.txt" />
-      <Content Include="InputData\day01.test2.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="InputData\day01-2.test.result.txt" />
-      <None Remove="InputData\day02.txt" />
-      <Content Include="InputData\day02.txt">
+      <None Remove="InputData\*.txt" />
+      <Content Include="InputData\*.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

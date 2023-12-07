@@ -2,7 +2,7 @@ namespace AdventOfCode2023.Tests;
 
 public sealed class TestDay02Solution
 {
-    private const string Test1Input =
+    private const string ExampleData =
         """
         Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
         Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
@@ -11,20 +11,17 @@ public sealed class TestDay02Solution
         Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
         """;
 
-    private static readonly string[] Test1InputLines = Test1Input.Split("\n");
+    private static IReadOnlyList<string> ExampleDataLines =>
+        ExampleData.Lines();
 
-    public static IEnumerable<object[]> GetPowerCombinations()
-    {
-        yield return new object[] { Test1InputLines[0], 48 };
-        yield return new object[] { Test1InputLines[1], 12 };
-        yield return new object[] { Test1InputLines[2], 1560 };
-        yield return new object[] { Test1InputLines[3], 630 };
-        yield return new object[] { Test1InputLines[4], 36 };
-    }
+    private static readonly int[] ExpectedPower = { 48, 12, 1560, 630, 36 };
+
+    public static IEnumerable<object[]> GetPowerCombinations() =>
+        ExampleDataLines.Select((l, i) => new object[] { l, ExpectedPower[i] });
 
     [Fact]
     public void TestInputLineCount() =>
-        Assert.Equal(5, Test1InputLines.Length);
+        Assert.Equal(5, ExampleDataLines.Count);
 
     [Fact]
     public void TestParser()
@@ -36,7 +33,7 @@ public sealed class TestDay02Solution
             new Day02Solution.Take(1, 5, 0)
         });
 
-        Day02Solution.Game actual = Day02Solution.Parse(Test1InputLines[2]);
+        Day02Solution.Game actual = Day02Solution.Parse(ExampleDataLines[2]);
 
         Assert.Equal(expected, actual);
     }
@@ -45,7 +42,7 @@ public sealed class TestDay02Solution
     public void TestExample1()
     {
         Day02Solution.Take limits = new Day02Solution.Take(12, 13, 14);
-        int actual = Test1InputLines.Select(Day02Solution.Parse).Where(g => g.IsPossible(limits)).Select(g => g.Number).Sum();
+        int actual = ExampleDataLines.Select(Day02Solution.Parse).Where(g => g.IsPossible(limits)).Select(g => g.Number).Sum();
 
         Assert.Equal(8, actual);
     }

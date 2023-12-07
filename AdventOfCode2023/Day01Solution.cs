@@ -19,6 +19,12 @@ internal sealed class Day01Solution : ISolution
     public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
         input.Select(ConvertDigits).Select(BuildNumber).Sum();
 
+    internal static int BuildNumber(string line)
+    {
+        List<int> digits = line.Where(char.IsDigit).Select(c => c - '0').ToList();
+        return digits.First() * 10 + digits.Last();
+    }
+
     internal static int TestSecondPuzzle(IEnumerable<string> input)
     {
         List<string> digits = input.Select(ConvertDigits).ToList();
@@ -80,11 +86,5 @@ internal sealed class Day01Solution : ISolution
         }
 
         return '0';
-    }
-
-    private static int BuildNumber(string line)
-    {
-        List<int> digits = line.Where(char.IsDigit).Select(c => c - '0').ToList();
-        return digits.First() * 10 + digits.Last();
     }
 }
