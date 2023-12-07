@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace AdventOfCode2023;
 
 public sealed class Day03Solution : ISolution
@@ -47,12 +49,12 @@ public sealed class Day03Solution : ISolution
 
                     inNumber = isDigit;
                     if (isDigit) left = x;
-                    else yield return new Number(left, y, x - left, 0);
+                    else yield return new Number(left, y, x - left);
                 }
 
                 if (!inNumber) continue;
 
-                yield return new Number(left, y, _width - left, 0);
+                yield return new Number(left, y, _width - left);
                 inNumber = false;
             }
         }
@@ -71,6 +73,36 @@ public sealed class Day03Solution : ISolution
             return new Map(map);
         }
 
-        internal readonly record struct Number(int X, int Y, int Length, int Value);
+        internal bool IsInRange(Point point) =>
+            point.X >= 0 && point.X < _width && point.Y >= 0 && point.Y < _height;
+
+        internal IEnumerable<Point> EnumerateCells(Number number) =>
+            number.EnumerateCells().Where(number.IsOutside).Where(IsInRange);
+
+        internal bool IsPartNumber(Number number) =>
+            EnumerateCells(number).Select(GetValue).Any(IsSymbol);
+
+        private static bool IsSymbol(char value) =>
+            !char.IsDigit(value) && value != '.';
+
+        internal char GetValue(Point point) =>
+            _map[point.Y, point.X];
+
+        internal readonly record struct Number(int X, int Y, int Length)
+        {
+            internal IEnumerable<Point> EnumerateCells() =>
+                EnumerateCells(X - 1, Y - 1, Length + 2, 3);
+
+            internal bool IsInside(Point point) =>
+                point.X >= X && point.X - X < Length && point.Y == Y;
+
+            internal bool IsOutside(Point point) =>
+                point.Y != Y || point.X < X || point.X - X >= Length;
+
+            private static IEnumerable<Point> EnumerateCells(int x, int y, int width, int height) =>
+                Enumerable
+                    .Range(y, height)
+                    .SelectMany(py => Enumerable.Range(x, width).Select(px => new Point(px, py)));
+        }
     }
 }
