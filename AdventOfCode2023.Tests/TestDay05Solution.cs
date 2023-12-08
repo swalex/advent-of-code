@@ -72,7 +72,7 @@ public sealed class TestDay05Solution
     {
         Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
 
-        Assert.Equal(number, almanac.GetValue("soil", index));
+        Assert.Equal(number, almanac.GetValueByIndex("soil", index));
     }
 
     [Theory]
@@ -81,7 +81,7 @@ public sealed class TestDay05Solution
     {
         Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
 
-        Assert.Equal(location, almanac.GetValue("location", index));
+        Assert.Equal(location, almanac.GetValueByIndex("location", index));
     }
 
     [Fact]
