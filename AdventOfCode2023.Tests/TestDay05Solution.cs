@@ -48,6 +48,9 @@ public sealed class TestDay05Solution
     public static IEnumerable<object[]> EnumerateExpectedSeeds() =>
         ExpectedSeeds.Select((seed, index) => new object[] { index, seed });
 
+    public static IEnumerable<object[]> EnumerateExpectedSoilNumbers() =>
+        ExpectedSoilNumbers.Select((number, index) => new object[] { index, number });
+
     [Theory]
     [MemberData(nameof(EnumerateExpectedSeeds))]
     public void VerifySeed(int index, int seed)
@@ -55,5 +58,14 @@ public sealed class TestDay05Solution
         Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
 
         Assert.Equal(seed, almanac.Seeds[index]);
+    }
+
+    [Theory]
+    [MemberData(nameof(EnumerateExpectedSoilNumbers))]
+    public void VerifySoilNumber(int index, int number)
+    {
+        Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
+
+        Assert.Equal(number, almanac.GetValue("soil", index));
     }
 }

@@ -20,11 +20,40 @@ public sealed class Day05Solution : ISolution
     internal static Almanac ParseAlmanac(IEnumerable<string> lines) =>
         TheParser.Parse(string.Join('\n', lines));
 
-    internal readonly record struct Range(int DestinationStart, int SourceStart, int Length);
+    internal sealed record Range(int DestinationStart, int SourceStart, int Length)
+    {
+        internal bool Contains(int value) =>
+            SourceStart <= value && value < SourceStart + Length;
 
-    internal readonly record struct RangeMap(string From, string To, Range[] Ranges);
+        internal int Resolve(int value) =>
+            value - SourceStart + DestinationStart;
+    }
 
-    internal readonly record struct Almanac(int[] Seeds, RangeMap[] Maps);
+    internal sealed record RangeMap(string From, string To, Range[] Ranges)
+    {
+        internal int Resolve(int value) =>
+            Ranges.FirstOrDefault(r => r.Contains(value))?.Resolve(value) ?? value;
+    }
+
+    internal sealed record Almanac(int[] Seeds, RangeMap[] Maps)
+    {
+        public int GetValue(string key, int index)
+        {
+            int value = Seeds[index];
+            var step = "seed";
+            do
+            {
+                RangeMap map = GetMapFor(step);
+                value = map.Resolve(value);
+                step = map.To;
+            } while (!key.Equals(step));
+
+            return value;
+        }
+
+        private RangeMap GetMapFor(string step) =>
+            Maps.Single(m => step.Equals(m.From));
+    }
 
     private static class TheParser
     {
