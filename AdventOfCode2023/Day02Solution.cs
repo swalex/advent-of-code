@@ -17,11 +17,15 @@ internal sealed class Day02Solution : ISolution
     private enum Tokens
     {
         Word,
+
         Number,
+
         [Token(Example = ":")]
         Colon,
+
         [Token(Example = ",")]
         Comma,
+
         [Token(Example = ";")]
         Semicolon
     }
