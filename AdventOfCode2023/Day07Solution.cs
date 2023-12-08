@@ -72,7 +72,7 @@ public sealed class Day07Solution : ISolution
             GetHandType(Cards.Replace('J', Pretend(Cards)));
 
         private static char Pretend(IEnumerable<char> cards) =>
-            cards.Where(c => c != 'J').GroupBy(c => c).OrderBy(g => g.Count()).Last().Key;
+            cards.Where(c => c != 'J').GroupBy(c => c).MaxBy(g => g.Count())?.Key ?? 'J';
 
         internal Type GetHandType() =>
             GetHandType(Cards);
