@@ -15,13 +15,16 @@ public sealed class Day05Solution : ISolution
         SolveFirstPuzzle(ParseAlmanac(input));
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        throw new NotImplementedException();
+        SolveSecondPuzzle(ParseAlmanac(input));
 
     internal static Almanac ParseAlmanac(IEnumerable<string> lines) =>
         TheParser.Parse(lines);
 
     private static long SolveFirstPuzzle(Almanac almanac) =>
         almanac.Seeds.Select(almanac.GetLocationForSeed).Min();
+
+    private static long SolveSecondPuzzle(Almanac almanac) =>
+        almanac.EnumerateAsRanges().Select(almanac.GetLocationForSeed).Min();
 
     internal sealed record Range(long DestinationStart, long SourceStart, long Length)
     {
@@ -40,11 +43,19 @@ public sealed class Day05Solution : ISolution
 
     internal sealed record Almanac(long[] Seeds, RangeMap[] Maps)
     {
+        internal IEnumerable<long> EnumerateAsRanges() =>
+            Seeds.Chunk(2).SelectMany(AsRange);
+
         internal long GetLocationForSeed(long seed) =>
             GetValueForSeed("location", seed);
 
         internal long GetValueByIndex(string key, long index) =>
             GetValueForSeed(key, Seeds[index]);
+
+        private static IEnumerable<long> AsRange(long[] chunk)
+        {
+            for (long i = 0; i < chunk[1]; i++) yield return chunk[0] + i;
+        }
 
         private long GetValueForSeed(string key, long value)
         {

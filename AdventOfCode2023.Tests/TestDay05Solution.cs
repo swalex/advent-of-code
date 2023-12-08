@@ -93,4 +93,24 @@ public sealed class TestDay05Solution
 
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void VerifySeedRanges()
+    {
+        const int expectedSeedCount = 27;
+
+        Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
+
+        Assert.Equal(expectedSeedCount, almanac.EnumerateAsRanges().Count());
+    }
+
+    [Fact]
+    public void VerifySecondResult()
+    {
+        const long expected = 46;
+
+        long actual = new Day05Solution().SolveSecondPuzzle(ExampleData.Lines());
+
+        Assert.Equal(expected, actual);
+    }
 }
