@@ -49,21 +49,22 @@ public sealed class Day04Solution : ISolution
     public int SolveSecondPuzzle(IReadOnlyList<string> input)
     {
         IReadOnlyList<Card> cards = input.Select(ParseCard).ToList();
-        var pending = new Stack<Card>(cards);
-        var total = new int[cards.Count];
+        var multiplier = new int[cards.Count];
+        int total = 0;
 
-        while (pending.TryPop(out Card card))
+        foreach (Card card in cards)
         {
+            int factor = multiplier[card.Number - 1] + 1;
+            total += factor;
+
             IEnumerable<int> wins = Enumerable.Range(card.Number, card.EnumerateMatchingNumbers().Count());
             foreach (int win in wins)
             {
-                pending.Push(cards[win]);
+                multiplier[win] += factor;
             }
-
-            total[card.Number - 1]++;
         }
 
-        return total.Sum();
+        return total;
     }
 
     internal static Card ParseCard(string line) =>
