@@ -56,4 +56,14 @@ public sealed class TestDay04Solution
 
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void Solution2()
+    {
+        const int expected = 30;
+
+        int actual = new Day04Solution().SolveSecondPuzzle(ExampleData.Lines());
+
+        Assert.Equal(expected, actual);
+    }
 }
