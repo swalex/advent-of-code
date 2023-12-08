@@ -20,29 +20,32 @@ public sealed class Day06Solution : ISolution
     private static Setup ParseSetup(IEnumerable<string> lines) =>
         BuildSetup(SplitInput(lines).ToList());
 
-    private static Setup BuildSetup(IReadOnlyList<IEnumerable<int>> splitInput) =>
+    private static Setup BuildSetup(IReadOnlyList<IEnumerable<long>> splitInput) =>
         new(splitInput[0].ToArray(), splitInput[1].ToArray());
 
-    private static IEnumerable<IEnumerable<int>> SplitInput(IEnumerable<string> lines) =>
+    private static IEnumerable<IEnumerable<long>> SplitInput(IEnumerable<string> lines) =>
         lines.Select(SplitLine);
 
-    private static IEnumerable<int> SplitLine(string line) =>
+    private static IEnumerable<long> SplitLine(string line) =>
         line.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
             .Skip(1)
-            .Select(int.Parse);
+            .Select(long.Parse);
 
-    internal sealed record Setup(int[] Times, int[] Distances)
+    internal sealed record Setup(long[] Times, long[] Distances)
     {
-        internal IEnumerable<IEnumerable<int>> EnumerateOptions() =>
+        internal IEnumerable<IEnumerable<long>> EnumerateOptions() =>
             Times.Select((time, index) =>
                 EnumerateOptionsFromTime(time).Where(distance => distance > Distances[index]));
 
-        private static IEnumerable<int> EnumerateOptionsFromTime(int time) =>
-            Enumerable
-                .Range(0, time)
-                .Select(ComputeDistance(time));
+        private static IEnumerable<long> EnumerateOptionsFromTime(long time) =>
+            Enumerate(time).Select(ComputeDistance(time));
 
-        private static Func<int, int> ComputeDistance(int time) =>
+        private static IEnumerable<long> Enumerate(long time)
+        {
+            for (long i = 0; i < time; i++) yield return i;
+        }
+
+        private static Func<long, long> ComputeDistance(long time) =>
             acceleration => (time - acceleration) * acceleration;
     }
 }
