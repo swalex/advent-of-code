@@ -120,8 +120,19 @@ public sealed class TestDay05Solution
         Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
         Day05Solution.RangeMap temperatureMap = almanac.Maps.Single(m => m.From == "temperature");
         Day05Solution.RangeMap humidityMap = almanac.Maps.Single(m => m.From == "humidity");
+
         Day05Solution.RangeMap merged = temperatureMap.MergeWith(humidityMap);
 
         Assert.Equal(5, merged.Ranges.Length);
+    }
+
+    [Fact]
+    public void VerifyCompileMaps()
+    {
+        Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
+
+        Day05Solution.RangeMap compiled = almanac.CompileMaps();
+
+        Assert.Equal(20, compiled.Ranges.Length);
     }
 }

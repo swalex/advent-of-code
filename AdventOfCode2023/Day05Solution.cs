@@ -23,8 +23,20 @@ public sealed class Day05Solution : ISolution
     private static long SolveFirstPuzzle(Almanac almanac) =>
         almanac.Seeds.Select(almanac.GetLocationForSeed).Min();
 
-    private static long SolveSecondPuzzle(Almanac almanac) =>
+    private static long BlowUpWhileSolvingSecondPuzzle(Almanac almanac) =>
         almanac.EnumerateAsRanges().Select(almanac.GetLocationForSeed).Min();
+
+    private static long SolveSecondPuzzle(Almanac almanac)
+    {
+        RangeMap seedsMap = almanac.BuildSeedsMap();
+        RangeMap compiledMap = almanac.CompileMaps();
+        RangeMap mergedMap = seedsMap.MergeWith(compiledMap);
+
+        return mergedMap.Ranges
+            .Where(r => seedsMap.Contains(r.SourceStart))
+            .Select(r => r.DestinationStart)
+            .Min();
+    }
 
     internal sealed record Range(long DestinationStart, long SourceStart, long Length)
     {
@@ -61,8 +73,13 @@ public sealed class Day05Solution : ISolution
 
     internal sealed record RangeMap(string From, string To, Range[] Ranges)
     {
+        internal bool Contains(long value) =>
+            Ranges.Any(r => r.ContainsSource(value));
+
         internal RangeMap MergeWith(RangeMap other)
         {
+            if (!To.Equals(other.From)) throw new InvalidOperationException();
+
             List<long> intersections = Intersect(Ranges, other.Ranges).ToList();
             Range[] ranges = intersections.SkipLast(1)
                 .Select((p, i) => new Range(other.Resolve(p), Reverse(p), intersections[i + 1] - p))
@@ -95,6 +112,13 @@ public sealed class Day05Solution : ISolution
 
         internal long GetValueByIndex(string key, long index) =>
             GetValueForSeed(key, Seeds[index]);
+
+        internal RangeMap CompileMaps() =>
+            Maps.Aggregate(default(RangeMap), (compiled, map) => compiled is null ? map : compiled.MergeWith(map)) ??
+            throw new InvalidOperationException();
+
+        internal RangeMap BuildSeedsMap() =>
+            new("love", "seed", Seeds.Chunk(2).Select(s => new Range(s[0], s[0], s[1])).ToArray());
 
         private static IEnumerable<long> AsRange(long[] chunk)
         {
