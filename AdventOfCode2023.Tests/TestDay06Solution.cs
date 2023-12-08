@@ -34,4 +34,14 @@ public sealed class TestDay06Solution
 
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void VerifySecondSolution()
+    {
+        const int expected = 71503;
+
+        long actual = new Day06Solution().SolveSecondPuzzle(ExampleData.Lines());
+
+        Assert.Equal(expected, actual);
+    }
 }

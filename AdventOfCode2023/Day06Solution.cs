@@ -9,7 +9,10 @@ public sealed class Day06Solution : ISolution
         EnumerateOptions(input).Aggregate(1, (a, b) => a * b);
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        throw new NotImplementedException();
+        EnumerateOptions(input.Select(ImproveKerning)).Aggregate(1, (a, b) => a * b);
+
+    private static string ImproveKerning(string line) =>
+        line.Replace(" ", string.Empty).Replace(":", ": ");
 
     public static IEnumerable<int> EnumerateOptions(IEnumerable<string> lines) =>
         ParseSetup(lines).EnumerateOptions().Select(o => o.Count());
