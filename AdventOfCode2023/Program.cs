@@ -2,6 +2,6 @@
 
 Console.WriteLine("Advent of Code 2023");
 
-var solution = new Day05Solution();
+var solution = new LatestSolution();
 
 solution.Solve();
