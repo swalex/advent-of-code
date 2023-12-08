@@ -71,10 +71,10 @@ internal sealed class Day02Solution : ISolution
     public int Day =>
         2;
 
-    public int SolveFirstPuzzle(IReadOnlyList<string> input) =>
+    public long SolveFirstPuzzle(IReadOnlyList<string> input) =>
         input.Select(Parse).Where(g => g.IsPossible(new Take(12, 13, 14))).Select(g => g.Number).Sum();
 
-    public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
+    public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
         input.Select(Parse).Select(g => g.Power).Sum();
 
     internal static Game Parse(string line) =>

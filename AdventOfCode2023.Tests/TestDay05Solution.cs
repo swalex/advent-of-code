@@ -89,7 +89,7 @@ public sealed class TestDay05Solution
     {
         int expected = FirstExpectedResult;
 
-        int actual = new Day05Solution().SolveFirstPuzzle(ExampleData.Lines());
+        long actual = new Day05Solution().SolveFirstPuzzle(ExampleData.Lines());
 
         Assert.Equal(expected, actual);
     }

@@ -43,10 +43,10 @@ public sealed class Day04Solution : ISolution
     public int Day =>
         4;
 
-    public int SolveFirstPuzzle(IReadOnlyList<string> input) =>
+    public long SolveFirstPuzzle(IReadOnlyList<string> input) =>
         input.Select(ParseCard).Select(c => c.Points).Sum();
 
-    public int SolveSecondPuzzle(IReadOnlyList<string> input)
+    public long SolveSecondPuzzle(IReadOnlyList<string> input)
     {
         IReadOnlyList<Card> cards = input.Select(ParseCard).ToList();
         var multiplier = new int[cards.Count];

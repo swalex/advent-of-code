@@ -7,13 +7,13 @@ public sealed class Day03Solution : ISolution
     public int Day =>
         3;
 
-    public int SolveFirstPuzzle(IReadOnlyList<string> input)
+    public long SolveFirstPuzzle(IReadOnlyList<string> input)
     {
         Map map = GetMap(input);
         return map.EnumeratePartNumbers().Select(map.GetValue).Sum();
     }
 
-    public int SolveSecondPuzzle(IReadOnlyList<string> input)
+    public long SolveSecondPuzzle(IReadOnlyList<string> input)
     {
         Map map = GetMap(input);
         List<Point> potentialGears = map.EnumeratePotentialGears().ToList();

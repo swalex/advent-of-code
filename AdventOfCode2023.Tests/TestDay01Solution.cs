@@ -48,9 +48,9 @@ public sealed class TestDay01Solution
     [Fact]
     public void Solution1Result()
     {
-        const int expected = 142;
+        const long expected = 142;
 
-        int actual = new Day01Solution().SolveFirstPuzzle(Example1Data.Lines());
+        long actual = new Day01Solution().SolveFirstPuzzle(Example1Data.Lines());
 
         Assert.Equal(expected, actual);
     }
@@ -58,9 +58,9 @@ public sealed class TestDay01Solution
     [Fact]
     public void Solution2Result()
     {
-        const int expected = 281;
+        const long expected = 281;
 
-        int actual = new Day01Solution().SolveSecondPuzzle(Example2Data.Lines());
+        long actual = new Day01Solution().SolveSecondPuzzle(Example2Data.Lines());
 
         Assert.Equal(expected, actual);
     }

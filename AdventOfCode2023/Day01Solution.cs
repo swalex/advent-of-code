@@ -13,10 +13,10 @@ internal sealed class Day01Solution : ISolution
     public int Day =>
         1;
 
-    public int SolveFirstPuzzle(IReadOnlyList<string> input) =>
+    public long SolveFirstPuzzle(IReadOnlyList<string> input) =>
         input.Select(BuildNumber).Sum();
 
-    public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
+    public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
         input.Select(ConvertDigits).Select(BuildNumber).Sum();
 
     internal static int BuildNumber(string line)

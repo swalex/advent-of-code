@@ -11,49 +11,51 @@ public sealed class Day05Solution : ISolution
     public int Day =>
         5;
 
-    public int SolveFirstPuzzle(IReadOnlyList<string> input) =>
+    public long SolveFirstPuzzle(IReadOnlyList<string> input) =>
         SolveFirstPuzzle(ParseAlmanac(input));
 
-    public int SolveSecondPuzzle(IReadOnlyList<string> input) =>
+    public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
         throw new NotImplementedException();
 
     internal static Almanac ParseAlmanac(IEnumerable<string> lines) =>
         TheParser.Parse(lines);
 
-    private static int SolveFirstPuzzle(Almanac almanac) =>
+    private static long SolveFirstPuzzle(Almanac almanac) =>
         almanac.Seeds.Select(almanac.GetLocationForSeed).Min();
 
-    internal sealed record Range(int DestinationStart, int SourceStart, int Length)
+    internal sealed record Range(long DestinationStart, long SourceStart, long Length)
     {
-        internal bool Contains(int value) =>
+        internal bool Contains(long value) =>
             SourceStart <= value && value < SourceStart + Length;
 
-        internal int Resolve(int value) =>
+        internal long Resolve(long value) =>
             value - SourceStart + DestinationStart;
     }
 
     internal sealed record RangeMap(string From, string To, Range[] Ranges)
     {
-        internal int Resolve(int value) =>
-            Ranges.FirstOrDefault(r => r.Contains(value))?.Resolve(value) ?? value;
+        internal long Resolve(long value) =>
+            Ranges.SingleOrDefault(r => r.Contains(value))?.Resolve(value) ?? value;
     }
 
-    internal sealed record Almanac(int[] Seeds, RangeMap[] Maps)
+    internal sealed record Almanac(long[] Seeds, RangeMap[] Maps)
     {
-        internal int GetLocationForSeed(int seed) =>
+        internal long GetLocationForSeed(long seed) =>
             GetValueForSeed("location", seed);
 
-        internal int GetValueByIndex(string key, int index) =>
+        internal long GetValueByIndex(string key, long index) =>
             GetValueForSeed(key, Seeds[index]);
 
-        private int GetValueForSeed(string key, int value)
+        private long GetValueForSeed(string key, long value)
         {
             var step = "seed";
             do
             {
+                // Console.Write($"{step} #{value} -> ");
                 RangeMap map = GetMapFor(step);
                 value = map.Resolve(value);
                 step = map.To;
+                // Console.WriteLine($"{value}");
             } while (!key.Equals(step));
 
             return value;
@@ -88,10 +90,10 @@ public sealed class Day05Solution : ISolution
             .Match(Numerics.Natural, AlmanacTokens.Number)
             .Build();
 
-        private static readonly TokenListParser<AlmanacTokens, int> NumberParser =
-            Token.EqualTo(AlmanacTokens.Number).Apply(Numerics.IntegerInt32);
+        private static readonly TokenListParser<AlmanacTokens, long> NumberParser =
+            Token.EqualTo(AlmanacTokens.Number).Apply(Numerics.IntegerInt64);
 
-        private static readonly TokenListParser<AlmanacTokens, int[]> NumbersParser =
+        private static readonly TokenListParser<AlmanacTokens, long[]> NumbersParser =
             NumberParser.Many();
 
         private static readonly TokenListParser<AlmanacTokens, Range> RangeParser =
@@ -126,7 +128,7 @@ public sealed class Day05Solution : ISolution
             from ranges in RangesParser
             select new RangeMap(header.From, header.To, ranges);
 
-        private static readonly TokenListParser<AlmanacTokens, int[]> SeedsParser =
+        private static readonly TokenListParser<AlmanacTokens, long[]> SeedsParser =
             from _ in Token.EqualToValue(AlmanacTokens.Identifier, "seeds")
             from __ in Token.EqualTo(AlmanacTokens.Colon)
             from seeds in NumbersParser

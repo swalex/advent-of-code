@@ -52,7 +52,7 @@ public sealed class TestDay04Solution
     {
         const int expected = 13;
 
-        int actual = new Day04Solution().SolveFirstPuzzle(ExampleData.Lines());
+        long actual = new Day04Solution().SolveFirstPuzzle(ExampleData.Lines());
 
         Assert.Equal(expected, actual);
     }
@@ -62,7 +62,7 @@ public sealed class TestDay04Solution
     {
         const int expected = 30;
 
-        int actual = new Day04Solution().SolveSecondPuzzle(ExampleData.Lines());
+        long actual = new Day04Solution().SolveSecondPuzzle(ExampleData.Lines());
 
         Assert.Equal(expected, actual);
     }
