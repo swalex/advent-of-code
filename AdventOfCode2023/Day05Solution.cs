@@ -26,8 +26,74 @@ public sealed class Day05Solution : ISolution
     private static long SolveSecondPuzzle(Almanac almanac) =>
         almanac.EnumerateAsRanges().Select(almanac.GetLocationForSeed).Min();
 
+    internal readonly record struct Mark(long Position, Mark.Types Type) : IComparable<Mark>
+    {
+        [Flags]
+        internal enum Types
+        {
+            SourceStart = 0,
+
+            SourceEnd = 1,
+
+            DestinationStart = 2,
+
+            DestinationEnd = 3
+        }
+
+        internal bool IsDestination =>
+            (Type & Types.DestinationStart) == Types.DestinationStart;
+
+        internal bool IsEnd =>
+            (Type & Types.SourceEnd) == Types.SourceEnd;
+
+        internal bool IsSource =>
+            (Type & Types.DestinationStart) == Types.SourceStart;
+
+        internal bool IsStart =>
+            (Type & Types.SourceEnd) == Types.SourceStart;
+
+        public int CompareTo(Mark other) =>
+            Position.CompareTo(other.Position);
+
+        internal static Mark DestinationEnd(long position) =>
+            new(position, Types.DestinationEnd);
+
+        internal static Mark DestinationStart(long position) =>
+            new(position, Types.DestinationStart);
+
+        internal static Mark SourceEnd(long position) =>
+            new(position, Types.SourceEnd);
+
+        internal static Mark SourceStart(long position) =>
+            new(position, Types.SourceStart);
+    }
+
     internal sealed record Range(long DestinationStart, long SourceStart, long Length)
     {
+        internal IEnumerable<Mark> DestinationMarks
+        {
+            get
+            {
+                yield return Mark.DestinationStart(DestinationStart);
+                yield return Mark.DestinationEnd(DestinationEnd);
+            }
+        }
+
+        internal IEnumerable<Mark> SourceMarks
+        {
+            get
+            {
+                yield return Mark.SourceStart(SourceStart);
+                yield return Mark.SourceEnd(SourceEnd);
+            }
+        }
+
+        internal long DestinationEnd =>
+            DestinationStart + Length;
+
+        internal long SourceEnd =>
+            SourceStart + Length;
+
         internal bool Contains(long value) =>
             SourceStart <= value && value < SourceStart + Length;
 
@@ -37,8 +103,40 @@ public sealed class Day05Solution : ISolution
 
     internal sealed record RangeMap(string From, string To, Range[] Ranges)
     {
+        internal RangeMap MergeWith(RangeMap other) =>
+            new(From, other.To, Merge(Ranges, other.Ranges).ToArray());
+
         internal long Resolve(long value) =>
             Ranges.SingleOrDefault(r => r.Contains(value))?.Resolve(value) ?? value;
+
+        private static IEnumerable<Range> Merge(IEnumerable<Range> front, IEnumerable<Range> back)
+        {
+            List<Mark> marks = front
+                .SelectMany(r => r.DestinationMarks)
+                .Concat(back.SelectMany(r => r.SourceMarks))
+                .Distinct(MarkComparer.Instance)
+                .OrderBy(m => m)
+                .ToList();
+            return marks.SkipLast(1).Select((m, i) =>
+            {
+
+            });
+        }
+
+        private sealed class MarkComparer : IEqualityComparer<Mark>
+        {
+            private MarkComparer()
+            {
+            }
+
+            internal static IEqualityComparer<Mark> Instance { get; } = new MarkComparer();
+
+            public bool Equals(Mark x, Mark y) =>
+                x.Position.Equals(y.Position);
+
+            public int GetHashCode(Mark mark) =>
+                mark.Position.GetHashCode();
+        }
     }
 
     internal sealed record Almanac(long[] Seeds, RangeMap[] Maps)

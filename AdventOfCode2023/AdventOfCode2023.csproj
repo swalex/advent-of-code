@@ -9,14 +9,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="InputData\*.txt" />
-      <Content Include="InputData\*.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
+        <None Remove="InputData\*.txt"/>
+        <Content Include="InputData\*.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Superpower" Version="3.0.0" />
+        <PackageReference Include="Superpower" Version="3.0.0"/>
     </ItemGroup>
 
 </Project>

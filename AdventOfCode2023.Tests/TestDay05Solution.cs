@@ -113,4 +113,15 @@ public sealed class TestDay05Solution
 
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void VerifyMergeTemperatureAndHumidity()
+    {
+        Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
+        Day05Solution.RangeMap temperatureMap = almanac.Maps.Single(m => m.From == "temperature");
+        Day05Solution.RangeMap humidityMap = almanac.Maps.Single(m => m.From == "humidity");
+        Day05Solution.RangeMap merged = temperatureMap.MergeWith(humidityMap);
+
+        Assert.Equal(5, merged.Ranges.Length);
+    }
 }
