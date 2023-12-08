@@ -45,11 +45,17 @@ public sealed class TestDay05Solution
 
     private static readonly int[] ExpectedLocations = { 82, 43, 86, 35 };
 
+    private static int FirstExpectedResult =>
+        ExpectedLocations.Min();
+
     public static IEnumerable<object[]> EnumerateExpectedSeeds() =>
         ExpectedSeeds.Select((seed, index) => new object[] { index, seed });
 
     public static IEnumerable<object[]> EnumerateExpectedSoilNumbers() =>
         ExpectedSoilNumbers.Select((number, index) => new object[] { index, number });
+
+    public static IEnumerable<object[]> EnumerateExpectedLocations() =>
+        ExpectedLocations.Select((location, index) => new object[] { index, location });
 
     [Theory]
     [MemberData(nameof(EnumerateExpectedSeeds))]
@@ -67,5 +73,24 @@ public sealed class TestDay05Solution
         Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
 
         Assert.Equal(number, almanac.GetValue("soil", index));
+    }
+
+    [Theory]
+    [MemberData(nameof(EnumerateExpectedLocations))]
+    public void VerifyLocation(int index, int location)
+    {
+        Day05Solution.Almanac almanac = Day05Solution.ParseAlmanac(ExampleData.Lines());
+
+        Assert.Equal(location, almanac.GetValue("location", index));
+    }
+
+    [Fact]
+    public void VerifyFirstResult()
+    {
+        int expected = FirstExpectedResult;
+
+        int actual = new Day05Solution().SolveFirstPuzzle(ExampleData.Lines());
+
+        Assert.Equal(expected, actual);
     }
 }
