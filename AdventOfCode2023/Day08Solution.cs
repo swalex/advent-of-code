@@ -13,15 +13,19 @@ public sealed class Day08Solution : ISolution
     {
         (int[] directions, (string, string, string)[] nodes) data = TheParser.Parse(input);
 
-        string first = data.nodes[0].Item1;
+        var current = "AAA";
+        const string last = "ZZZ";
         Dictionary<string, (string, string)> map = data.nodes.ToDictionary(d => d.Item1, d => (d.Item2, d.Item3));
 
-        var step = 0;
-        while (first != "ZZZ")
+        var step = 0L;
+        var i = 0;
+        while (current != last)
         {
-            (string left, string right) = map[first];
-            first = data.directions[step % data.directions.Length] == 0 ? left : right;
+            (string left, string right) = map[current];
+            current = data.directions[i++] == 0 ? left : right;
             step++;
+
+            if (i == data.directions.Length) i = 0;
         }
 
         return step;
@@ -38,7 +42,8 @@ public sealed class Day08Solution : ISolution
             Equal,
             OpenBrace,
             Comma,
-            CloseBrace
+            CloseBrace,
+            Semicolon
         }
 
         private static readonly Tokenizer<MapToken> Tokenizer = new TokenizerBuilder<MapToken>()
@@ -48,13 +53,16 @@ public sealed class Day08Solution : ISolution
             .Match(Character.EqualTo('('), MapToken.OpenBrace)
             .Match(Character.EqualTo(','), MapToken.Comma)
             .Match(Character.EqualTo(')'), MapToken.CloseBrace)
+            .Match(Character.EqualTo(';'), MapToken.Semicolon)
             .Build();
 
         private static readonly TokenListParser<MapToken, int> DirectionParser =
             Token.EqualToValue(MapToken.Letter, "L").Value(0).Or(Token.EqualToValue(MapToken.Letter, "R").Value(1));
 
         private static readonly TokenListParser<MapToken, int[]> DirectionsParser =
-            DirectionParser.Many();
+            from directions in DirectionParser.Many()
+            from _ in Token.EqualTo(MapToken.Semicolon).Many()
+            select directions;
 
         private static readonly TokenListParser<MapToken, string> LocationParser =
             Token.EqualTo(MapToken.Letter).Apply(Character.Upper).Repeat(3).Select(c => new string(c));
@@ -64,7 +72,7 @@ public sealed class Day08Solution : ISolution
             from _ in Token.EqualTo(MapToken.Equal).IgnoreThen(Token.EqualTo(MapToken.OpenBrace))
             from left in LocationParser
             from right in Token.EqualTo(MapToken.Comma).IgnoreThen(LocationParser)
-            from __ in Token.EqualTo(MapToken.CloseBrace)
+            from __ in Token.EqualTo(MapToken.CloseBrace).IgnoreThen(Token.EqualTo(MapToken.Semicolon))
             select (location, left, right);
 
         private static readonly TokenListParser<MapToken, (string, string, string)[]> NodesParser =
@@ -76,6 +84,6 @@ public sealed class Day08Solution : ISolution
                 select (directions, nodes);
 
         internal static (int[] directions, (string, string, string)[] nodes) Parse(IEnumerable<string> input) =>
-            MapParser.Parse(Tokenizer.Tokenize(string.Join('\n', input)));
+            MapParser.Parse(Tokenizer.Tokenize(string.Join(";\n", input) + ';'));
     }
 }
