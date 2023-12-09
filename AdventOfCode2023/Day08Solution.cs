@@ -12,10 +12,10 @@ public sealed class Day08Solution : ISolution
     public long SolveFirstPuzzle(IReadOnlyList<string> input)
     {
         (int[] directions, (string, string, string)[] nodes) data = TheParser.Parse(input);
+        Dictionary<string, (string, string)> map = data.nodes.ToDictionary(d => d.Item1, d => (d.Item2, d.Item3));
 
         var current = "AAA";
         const string last = "ZZZ";
-        Dictionary<string, (string, string)> map = data.nodes.ToDictionary(d => d.Item1, d => (d.Item2, d.Item3));
 
         var step = 0L;
         var i = 0;
@@ -31,8 +31,90 @@ public sealed class Day08Solution : ISolution
         return step;
     }
 
-    public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        throw new NotImplementedException();
+    public long FailToSolveSecondPuzzle(IReadOnlyList<string> input)
+    {
+        (int[] directions, (string, string, string)[] nodes) data = TheParser.Parse(input);
+        Dictionary<string, (string, string)> map = data.nodes.ToDictionary(d => d.Item1, d => (d.Item2, d.Item3));
+
+        string[] positions = data.nodes.Select(n => n.Item1).Where(n => n[2] == 'A').ToArray();
+
+        Func<(string, string), string> leftSelector = x => x.Item1;
+        Func<(string, string), string> rightSelector = x => x.Item2;
+
+        var step = 0L;
+        var i = 0;
+        while (positions.Any(p => p[2] != 'Z'))
+        {
+            Func<(string, string), string> selector = data.directions[i] == 0 ? leftSelector : rightSelector;
+
+            for (var j = 0; j < positions.Length; j++)
+            {
+                positions[j] = selector.Invoke(map[positions[j]]);
+            }
+
+            i++;
+            step++;
+            if (i == data.directions.Length) i = 0;
+
+            if (step % 1000000 == 0) Console.Write('.');
+            if (step % 100000000 == 0) Console.WriteLine();
+        }
+
+        return step;
+    }
+
+    public long SolveSecondPuzzle(IReadOnlyList<string> input)
+    {
+        (int[] directions, (string, string, string)[] nodes) data = TheParser.Parse(input);
+        Dictionary<string, (string, string)> map = data.nodes.ToDictionary(d => d.Item1, d => (d.Item2, d.Item3));
+
+        string[] positions = data.nodes.Select(n => n.Item1).Where(n => n[2] == 'A').ToArray();
+
+        Func<(string, string), string> leftSelector = x => x.Item1;
+        Func<(string, string), string> rightSelector = x => x.Item2;
+
+        long[] steps = positions.Select(_ => 0L).ToArray();
+
+        for (var j = 0; j < positions.Length; j++)
+        {
+            var step = 0L;
+            var i = 0;
+
+            while (positions[j][2] != 'Z')
+            {
+                Func<(string, string), string> selector = data.directions[i] == 0 ? leftSelector : rightSelector;
+
+                    positions[j] = selector.Invoke(map[positions[j]]);
+
+                i++;
+                step++;
+                if (i == data.directions.Length) i = 0;
+            }
+
+            steps[j] = step;
+        }
+
+        Console.WriteLine(string.Join(", ", steps.Select(s => s.ToString())));
+        return LeastCommonMultiple(steps);
+    }
+
+    private static long LeastCommonMultiple(IEnumerable<long> numbers) =>
+        numbers.Aggregate(LeastCommonMultiple);
+
+    private static long LeastCommonMultiple(long a, long b) =>
+        Math.Abs(a * b) / GreatestCommonDivisor(a, b);
+
+    private static long GreatestCommonDivisor(long a, long b)
+    {
+        while (true)
+        {
+            if (b == 0) return a;
+
+            long tmp = a;
+            a = b;
+            b = tmp % b;
+        }
+    }
 
     private static class TheParser
     {
@@ -48,7 +130,7 @@ public sealed class Day08Solution : ISolution
 
         private static readonly Tokenizer<MapToken> Tokenizer = new TokenizerBuilder<MapToken>()
             .Ignore(Character.WhiteSpace)
-            .Match(Character.Upper, MapToken.Letter)
+            .Match(Character.Upper.Or(Character.Digit), MapToken.Letter)
             .Match(Character.EqualToIgnoreCase('='), MapToken.Equal)
             .Match(Character.EqualTo('('), MapToken.OpenBrace)
             .Match(Character.EqualTo(','), MapToken.Comma)
@@ -65,7 +147,7 @@ public sealed class Day08Solution : ISolution
             select directions;
 
         private static readonly TokenListParser<MapToken, string> LocationParser =
-            Token.EqualTo(MapToken.Letter).Apply(Character.Upper).Repeat(3).Select(c => new string(c));
+            Token.EqualTo(MapToken.Letter).Apply(Character.Upper.Or(Character.Digit)).Repeat(3).Select(c => new string(c));
 
         private static readonly TokenListParser<MapToken, (string location, string left, string right)> NodeParser =
             from location in LocationParser
