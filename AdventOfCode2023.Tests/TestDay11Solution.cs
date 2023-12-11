@@ -24,10 +24,19 @@ public sealed class TestDay11Solution
         (8, 9, 5)
     };
 
+    private static readonly (int, int)[] ExpectedScaledResults =
+    {
+        (10, 1030),
+        (100, 8410)
+    };
+
     private const int ExpectedFirstResult = 374;
 
     public static IEnumerable<object[]> EnumerateDistances() =>
         Distances.Select(d => new object[] { d.Item1, d.Item2, d.Item3 });
+
+    public static IEnumerable<object[]> EnumerateExpectedScaledResults() =>
+        ExpectedScaledResults.Select(d => new object[] { d.Item1, d.Item2 });
 
     [Theory]
     [MemberData(nameof(EnumerateDistances))]
@@ -46,5 +55,16 @@ public sealed class TestDay11Solution
         long actual = new Day11Solution().SolveFirstPuzzle(ExampleData.Lines());
 
         Assert.Equal(ExpectedFirstResult, actual);
+    }
+
+    [Theory]
+    [MemberData(nameof(EnumerateExpectedScaledResults))]
+    public void VerifySecondSolution(int scale, int expectedDistance)
+    {
+        Day11Solution.Map map = Day11Solution.Map.Parse(ExampleData.Lines());
+
+        long actual = map.GetResult(scale);
+
+        Assert.Equal(expectedDistance, actual);
     }
 }

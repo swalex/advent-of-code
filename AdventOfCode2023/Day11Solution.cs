@@ -11,14 +11,10 @@ public sealed class Day11Solution : ISolution
         Map.Parse(input).GetResult();
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        throw new NotImplementedException();
+        Map.Parse(input).GetResult(1000000);
 
     internal sealed class Map
     {
-        private readonly char[,] _data;
-
-        private readonly Rectangle _bounds;
-
         private readonly byte[] _occupiedColumns;
 
         private readonly byte[] _occupiedRows;
@@ -27,9 +23,6 @@ public sealed class Day11Solution : ISolution
 
         private Map(char[,] data, Rectangle bounds)
         {
-            _data = data;
-            _bounds = bounds;
-
             _occupiedColumns = new byte[bounds.Width];
             _occupiedRows = new byte[bounds.Height];
 
@@ -47,7 +40,7 @@ public sealed class Day11Solution : ISolution
             }
         }
 
-        internal long GetDistance(int a, int b)
+        internal long GetDistance(int a, int b, long voidDistance = 2)
         {
             Point i = _galaxies[a - 1];
             Point j = _galaxies[b - 1];
@@ -61,22 +54,22 @@ public sealed class Day11Solution : ISolution
 
             for (var x = 1; x < dx; x++)
             {
-                if (_occupiedColumns[x + sx] == 0) distance++;
+                if (_occupiedColumns[x + sx] == 0) distance += voidDistance - 1;
             }
 
             for (var y = 1; y < dy; y++)
             {
-                if (_occupiedRows[y + sy] == 0) distance++;
+                if (_occupiedRows[y + sy] == 0) distance += voidDistance - 1;
             }
 
             return distance;
         }
 
-        internal IEnumerable<long> EnumerateDistances() =>
-            EnumerateGalaxyPairs().Select(p => GetDistance(p.Item1, p.Item2));
+        private IEnumerable<long> EnumerateDistances(long voidDistance) =>
+            EnumerateGalaxyPairs().Select(p => GetDistance(p.Item1, p.Item2, voidDistance));
 
-        internal long GetResult() =>
-            EnumerateDistances().Aggregate(0L, (r, d) => r + d);
+        internal long GetResult(long voidDistance = 2) =>
+            EnumerateDistances(voidDistance).Aggregate(0L, (r, d) => r + d);
 
         private void ScanCells(char[,] data, Size size)
         {
