@@ -11,31 +11,65 @@ public sealed class Day12Solution : ISolution
         input.Select(GetArrangementCount).Sum();
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        throw new NotImplementedException();
+        input.Select(GetUnfoldedArrangementCount).Sum();
 
     public static int GetArrangementCount(string line) =>
-        GetArrangementCount(BuildRecord(line));
+        GetArrangementCount(BuildRecord(line, 0));
+
+    internal static long GetUnfoldedArrangementCount(string line)
+    {
+        long a = GetArrangementCount(BuildRecord(line, 1));
+        long b = GetArrangementCount(BuildRecord(line, 2));
+        long c = GetArrangementCount(BuildRecord(line, 0));
+        long d = GetArrangementCount(BuildRecord(line, -2));
+
+        if (a < b) (a, b) = (b, a);
+        if (d != a * b) a = b;
+
+        return Enumerable.Range(1, 3).Aggregate(a, (acc, _) => acc * a) * b;
+    }
 
     private static int GetArrangementCount(Record record) =>
         record.EnumerateVariants().Count(record.Matches);
 
     internal static IEnumerable<string> EnumerateVariants(string line) =>
-        BuildRecord(line).EnumerateVariants();
+        BuildRecord(line, 0).EnumerateVariants();
 
-    private static Record BuildRecord(string line)
+    private static Record BuildRecord(string line, int flavor)
     {
         string[] parts = line.Split(' ', StringSplitOptions.TrimEntries);
         int[] counts = parts[1].Split(',').Select(int.Parse).ToArray();
 
-        return new Record(parts[0], counts);
+        string pattern = parts[0];
+
+        if (flavor < 0)
+        {
+            pattern = string.Join('?', Enumerable.Repeat(0, -flavor).Select(_ => pattern).ToList());
+            counts = Enumerable.Repeat(0, -flavor).SelectMany(_ => counts).ToArray();
+        }
+        else
+        {
+            pattern = ApplyFlavor(pattern, flavor);
+        }
+
+        return new Record(pattern, counts);
     }
 
-    private sealed class Record(string pattern, int[] counts)
+    private static string ApplyFlavor(string pattern, int flavor) =>
+        flavor switch
+        {
+            0 => pattern,
+            1 => $"?{pattern}",
+            2 => $"{pattern}?",
+            _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, "Invalid flavor")
+        };
+
+    private sealed class Record(string pattern, IReadOnlyList<int> counts)
     {
         internal IEnumerable<string> EnumerateVariants() =>
             EnumerateVariants(pattern.Length, counts);
 
-        private static IEnumerable<string> EnumerateVariants(int length, int[] workingCounts)
+        private static IEnumerable<string> EnumerateVariants(int length, IReadOnlyList<int> workingCounts)
         {
             var builder = new StringBuilder();
             int failLength = workingCounts.Sum();

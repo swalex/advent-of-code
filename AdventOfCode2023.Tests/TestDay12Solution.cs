@@ -26,6 +26,16 @@ public sealed class TestDay12Solution
         10
     };
 
+    private static readonly int[] ExpectedUnfoldedArrangementCounts =
+    {
+        1,
+        16384,
+        1,
+        16,
+        2500,
+        506250
+    };
+
     public TestDay12Solution(ITestOutputHelper helper)
     {
         _helper = helper ?? throw new ArgumentNullException(nameof(helper));
@@ -37,12 +47,14 @@ public sealed class TestDay12Solution
     public static IEnumerable<object[]> EnumerateExpectedArrangementCounts() =>
         ExpectedArrangementCounts.Select((d, i) => new object[] { ExampleData.Line(i), d });
 
+    public static IEnumerable<object[]> EnumerateExpectedUnfoldedArrangementCounts() =>
+        ExpectedUnfoldedArrangementCounts.Select((d, i) => new object[] { ExampleData.Line(i), d });
 
     [Theory]
     [MemberData(nameof(EnumerateExpectedArrangementCounts))]
-    public void DumpVariantsCount(string line, int _)
+    public void DumpVariantsCount(string line, int expectedCount)
     {
-        _helper.WriteLine(line);
+        _helper.WriteLine($"{line} ({expectedCount})");
         foreach (string variant in Day12Solution.EnumerateVariants(line))
         {
             _helper.WriteLine(variant);
@@ -66,11 +78,20 @@ public sealed class TestDay12Solution
         Assert.Equal(ExpectedFirstResult, actual);
     }
 
+    [Theory]
+    [MemberData(nameof(EnumerateExpectedUnfoldedArrangementCounts))]
+    public void VerifyUnfoldedArrangementCount(string line, int expectedCount)
+    {
+        long actual = Day12Solution.GetUnfoldedArrangementCount(line);
+
+        Assert.Equal(expectedCount, actual);
+    }
+
     [Fact]
     public void VerifySecondSolution()
     {
         long actual = new Day12Solution().SolveSecondPuzzle(ExampleData.Lines());
 
-        Assert.Equal(0, actual);
+        Assert.Equal(525152, actual);
     }
 }
