@@ -18,15 +18,16 @@ public sealed class Day12Solution : ISolution
 
     internal static long GetUnfoldedArrangementCount(string line)
     {
-        long a = GetArrangementCount(BuildRecord(line, 1));
-        long b = GetArrangementCount(BuildRecord(line, 2));
-        long c = GetArrangementCount(BuildRecord(line, 0));
-        long d = GetArrangementCount(BuildRecord(line, -2));
+        long a = GetArrangementCount(BuildRecord(line, 0));
+        long b = GetArrangementCount(BuildRecord(line, 1));
+        long c = GetArrangementCount(BuildRecord(line, 2));
+        long d = GetArrangementCount(BuildRecord(line, 3));
+        long e = GetArrangementCount(BuildRecord(line, -2));
 
-        if (a < b) (a, b) = (b, a);
-        if (d != a * b) a = b;
+        if (b < c) (b, c) = (c, b);
+        if (e == 1) return 1;
 
-        return Enumerable.Range(1, 3).Aggregate(a, (acc, _) => acc * a) * b;
+        return b * b * b * b * c;
     }
 
     private static int GetArrangementCount(Record record) =>
@@ -61,6 +62,7 @@ public sealed class Day12Solution : ISolution
             0 => pattern,
             1 => $"?{pattern}",
             2 => $"{pattern}?",
+            3 => $"?{pattern}?",
             _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, "Invalid flavor")
         };
 
