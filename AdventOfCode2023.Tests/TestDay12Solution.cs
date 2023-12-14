@@ -94,4 +94,15 @@ public sealed class TestDay12Solution
 
         Assert.Equal(525152, actual);
     }
+
+    [Fact]
+    public void FuckEverythingSucks()
+    {
+        const string line = "??????????#.. 6,1";
+        const int expectedCount = 4;
+
+        long actual = Day12Solution.GetArrangementCount(line);
+
+        Assert.Equal(expectedCount, actual);
+    }
 }

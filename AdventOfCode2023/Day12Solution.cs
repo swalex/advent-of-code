@@ -14,57 +14,36 @@ public sealed class Day12Solution : ISolution
         input.Select(GetUnfoldedArrangementCount).Sum();
 
     public static int GetArrangementCount(string line) =>
-        GetArrangementCount(BuildRecord(line, 0));
+        GetArrangementCount(BuildRecord(line, false));
 
     internal static long GetUnfoldedArrangementCount(string line)
     {
-        long a = GetArrangementCount(BuildRecord(line, 0));
-        long b = GetArrangementCount(BuildRecord(line, 1));
-        long c = GetArrangementCount(BuildRecord(line, 2));
-        long d = GetArrangementCount(BuildRecord(line, 3));
-        long e = GetArrangementCount(BuildRecord(line, -2));
-
-        if (b < c) (b, c) = (c, b);
-        if (e == 1) return 1;
-
-        return b * b * b * b * c;
+        long b = GetArrangementCount(BuildRecord(line, false));
+        long a = GetArrangementCount(BuildRecord(line, true));
+        return a * a * a * a * b;
     }
 
     private static int GetArrangementCount(Record record) =>
         record.EnumerateVariants().Count(record.Matches);
 
     internal static IEnumerable<string> EnumerateVariants(string line) =>
-        BuildRecord(line, 0).EnumerateVariants();
+        BuildRecord(line, false).EnumerateVariants();
 
-    private static Record BuildRecord(string line, int flavor)
+    private static Record BuildRecord(string line, bool unfold)
     {
         string[] parts = line.Split(' ', StringSplitOptions.TrimEntries);
         int[] counts = parts[1].Split(',').Select(int.Parse).ToArray();
-
         string pattern = parts[0];
 
-        if (flavor < 0)
-        {
-            pattern = string.Join('?', Enumerable.Repeat(0, -flavor).Select(_ => pattern).ToList());
-            counts = Enumerable.Repeat(0, -flavor).SelectMany(_ => counts).ToArray();
-        }
-        else
-        {
-            pattern = ApplyFlavor(pattern, flavor);
-        }
-
-        return new Record(pattern, counts);
+        return new Record(unfold ? UnfoldPattern(pattern) : pattern, counts);
     }
 
-    private static string ApplyFlavor(string pattern, int flavor) =>
-        flavor switch
-        {
-            0 => pattern,
-            1 => $"?{pattern}",
-            2 => $"{pattern}?",
-            3 => $"?{pattern}?",
-            _ => throw new ArgumentOutOfRangeException(nameof(flavor), flavor, "Invalid flavor")
-        };
+    private static string UnfoldPattern(string pattern)
+    {
+        char back = pattern[0] == '#' ? '.' : '?';
+        char front = pattern[^1] == '#' ? '.' : '?';
+        return $"{front}{pattern}{back}";
+    }
 
     private sealed class Record(string pattern, IReadOnlyList<int> counts)
     {
