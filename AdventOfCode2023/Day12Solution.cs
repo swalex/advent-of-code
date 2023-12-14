@@ -11,16 +11,25 @@ public sealed class Day12Solution : ISolution
         input.Select(GetArrangementCount).Sum();
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        input.Select(GetUnfoldedArrangementCount).Sum();
+        input.Select(i => GetUnfoldedArrangementCount(i)).Sum();
 
     public static int GetArrangementCount(string line) =>
         GetArrangementCount(BuildRecord(line, false));
 
-    internal static long GetUnfoldedArrangementCount(string line)
+    internal static long GetUnfoldedArrangementCount(string line, int folds = 5)
     {
         long b = GetArrangementCount(BuildRecord(line, false));
         long a = GetArrangementCount(BuildRecord(line, true));
-        return a * a * a * a * b;
+        return Enumerable.Repeat(0, folds - 1).Select(_ => a).Aggregate(1L, (acc, f) => acc * f) * b;
+    }
+
+    internal static long BruteForceUnfoldedArrangementCount(string line, int folds)
+    {
+        string[] parts = line.Split(' ');
+        string left = string.Join('?', Enumerable.Repeat(0, folds).Select(_ => parts[0]));
+        string right = string.Join(',', Enumerable.Repeat(0, folds).Select(_ => parts[1]));
+        string unfolded = string.Join(' ', left, right);
+        return GetArrangementCount(unfolded);
     }
 
     private static int GetArrangementCount(Record record) =>
@@ -65,7 +74,11 @@ public sealed class Day12Solution : ISolution
             {
                 yield return BuildVariant(builder, length, workingCounts, front, spaces, out int remaining);
 
-                if (remaining > 0)
+                if (spaces.Length == 0)
+                {
+                    front++;
+                }
+                else if (remaining > 0)
                 {
                     spaces[^1]++;
                 }

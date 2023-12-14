@@ -36,6 +36,12 @@ public sealed class TestDay12Solution
         506250
     };
 
+    private static readonly Dictionary<string, (int, (int, int)[])> AdditionalUnfoldedTests = new()
+    {
+        { "?? 1", (2, new[] { (5, 252), (2, 8) }) },
+        { "???? 1,1", (3, new[] { (5, 3003) }) },
+    };
+
     public TestDay12Solution(ITestOutputHelper helper)
     {
         _helper = helper ?? throw new ArgumentNullException(nameof(helper));
@@ -45,10 +51,16 @@ public sealed class TestDay12Solution
         ExpectedArrangementCounts.Sum();
 
     public static IEnumerable<object[]> EnumerateExpectedArrangementCounts() =>
-        ExpectedArrangementCounts.Select((d, i) => new object[] { ExampleData.Line(i), d });
+        ExpectedArrangementCounts.Select((d, i) => new object[] { ExampleData.Line(i), d })
+            .Concat(AdditionalUnfoldedTests.Select(entry => new object[] { entry.Key, entry.Value.Item1 }));
 
     public static IEnumerable<object[]> EnumerateExpectedUnfoldedArrangementCounts() =>
-        ExpectedUnfoldedArrangementCounts.Select((d, i) => new object[] { ExampleData.Line(i), d });
+        ExpectedUnfoldedArrangementCounts.Select((d, i) => new object[] { ExampleData.Line(i), d })
+            .Concat(AdditionalUnfoldedTests.Select(entry => new object[] { entry.Key, entry.Value.Item2[0].Item2 }));
+
+    public static IEnumerable<object[]> EnumerateAdditionalUnfoldedArrangementCounts() =>
+        AdditionalUnfoldedTests.SelectMany(entry => entry.Value.Item2.Select(subEntry =>
+            new object[] { entry.Key, subEntry.Item1, subEntry.Item2 }));
 
     [Theory]
     [MemberData(nameof(EnumerateExpectedArrangementCounts))]
@@ -83,6 +95,24 @@ public sealed class TestDay12Solution
     public void VerifyUnfoldedArrangementCount(string line, int expectedCount)
     {
         long actual = Day12Solution.GetUnfoldedArrangementCount(line);
+
+        Assert.Equal(expectedCount, actual);
+    }
+
+    [Theory]
+    [MemberData(nameof(EnumerateAdditionalUnfoldedArrangementCounts))]
+    public void VerifyAdditionalUnfoldedArrangementCount(string line, int folds, int expectedCount)
+    {
+        long actual = Day12Solution.GetUnfoldedArrangementCount(line, folds);
+
+        Assert.Equal(expectedCount, actual);
+    }
+
+    [Theory]
+    [MemberData(nameof(EnumerateAdditionalUnfoldedArrangementCounts))]
+    public void VerifyBruteForceUnfoldedArrangementCount(string line, int folds, int expectedCount)
+    {
+        long actual = Day12Solution.BruteForceUnfoldedArrangementCount(line, folds);
 
         Assert.Equal(expectedCount, actual);
     }
