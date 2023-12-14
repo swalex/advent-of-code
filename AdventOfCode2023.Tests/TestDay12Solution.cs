@@ -38,7 +38,7 @@ public sealed class TestDay12Solution
 
     private static readonly Dictionary<string, (int, (int, int)[])> AdditionalUnfoldedTests = new()
     {
-        { "?? 1", (2, new[] { (5, 252), (2, 8) }) },
+        { "?? 1", (2, new[] { (5, 252), (2, 6), (3, 20) }) },
         { "???? 1,1", (3, new[] { (5, 3003) }) },
     };
 

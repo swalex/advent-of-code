@@ -11,7 +11,7 @@ public sealed class Day12Solution : ISolution
         input.Select(GetArrangementCount).Sum();
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        input.Select(i => GetUnfoldedArrangementCount(i)).Sum();
+        input.Select(i => BruteForceUnfoldedArrangementCount(i, 5)).Sum();
 
     public static int GetArrangementCount(string line) =>
         GetArrangementCount(BuildRecord(line, false));
@@ -25,6 +25,7 @@ public sealed class Day12Solution : ISolution
 
     internal static long BruteForceUnfoldedArrangementCount(string line, int folds)
     {
+        Console.Write('.');
         string[] parts = line.Split(' ');
         string left = string.Join('?', Enumerable.Repeat(0, folds).Select(_ => parts[0]));
         string right = string.Join(',', Enumerable.Repeat(0, folds).Select(_ => parts[1]));
@@ -51,6 +52,7 @@ public sealed class Day12Solution : ISolution
     {
         char back = pattern[0] == '#' ? '.' : '?';
         char front = pattern[^1] == '#' ? '.' : '?';
+        return $"{pattern}{back}";
         return $"{front}{pattern}{back}";
     }
 
