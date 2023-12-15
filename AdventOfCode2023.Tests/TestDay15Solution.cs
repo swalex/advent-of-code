@@ -9,9 +9,8 @@ public sealed class TestDay15Solution
     {
         const int expectedValue = 52;
         const string input = "HASH";
-        Day15Solution.FancyHash hash = new();
 
-        byte actualValue = hash.Add(input);
+        int actualValue = input.FancyHash();
 
         Assert.Equal(expectedValue, actualValue);
     }
@@ -23,6 +22,17 @@ public sealed class TestDay15Solution
         var solution = new Day15Solution();
 
         long actual = solution.SolveFirstPuzzle(TestSequence.Lines());
+
+        Assert.Equal(expectedResult, actual);
+    }
+
+    [Fact]
+    public void VerifySecondSolution()
+    {
+        const long expectedResult = 145;
+        var solution = new Day15Solution();
+
+        long actual = solution.SolveSecondPuzzle(TestSequence.Lines());
 
         Assert.Equal(expectedResult, actual);
     }

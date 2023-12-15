@@ -17,13 +17,8 @@ public sealed class Day15Solution : ISolution
     private static long ComputeHash(string token) =>
         FancyHash.Calculate(token);
 
-    internal sealed class FancyHash
+    internal static class FancyHash
     {
-        private int _value;
-
-        internal byte Add(char letter) =>
-            (byte)(_value = Add(_value, letter));
-
         internal static int Calculate(string token) =>
             token.Aggregate(0, Add);
 
@@ -37,9 +32,12 @@ public sealed class Day15Solution : ISolution
         {
             Label = label;
             FocalLength = focalLength;
+            Box = label.FancyHash();
         }
 
         internal int FocalLength { get; }
+
+        internal int Box { get; }
 
         internal string Label { get; }
 
@@ -53,6 +51,6 @@ public sealed class Day15Solution : ISolution
 
 internal static class ExtensionsForFancyHash
 {
-    internal static byte Add(this Day15Solution.FancyHash hash, string letters) =>
-        letters.Select(hash.Add).Last();
+    internal static int FancyHash(this string token) =>
+        Day15Solution.FancyHash.Calculate(token);
 }
