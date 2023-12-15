@@ -12,8 +12,12 @@ public sealed class LatestSolution : ISolution
             .Select(Activator.CreateInstance)
             .OfType<ISolution>()
             .OrderBy(s => s.Day)
+            .Where(NotSuspended)
             .Last();
     }
+
+    private static bool NotSuspended(ISolution solution) =>
+        solution.Day < 15;
 
     public int Day =>
         _latest.Day;
