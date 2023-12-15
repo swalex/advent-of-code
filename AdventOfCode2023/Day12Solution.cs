@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AdventOfCode2023;
 
@@ -11,9 +12,54 @@ public sealed class Day12Solution : ISolution
         input.Select(GetArrangementCount).Sum();
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        input.Select(i => BruteForceUnfoldedArrangementCount(i, 5)).Sum();
+        input.Select(OptimizedBruteForce).Sum();
 
-    public static int GetArrangementCount(string line) =>
+    internal static long OptimizedBruteForce(string line) =>
+        BruteForceUnfoldedArrangementCount(Optimize(line), 5);
+
+    private static string Optimize(string line)
+    {
+        (string pattern, string lengthsString) = Split(line);
+        List<int> lengths = lengthsString.Split(',').Select(int.Parse).ToList();
+
+        bool repeat;
+        do
+        {
+            repeat = false;
+            for (int i = 0; i < lengths.Count; i++)
+            {
+                string match1 = @$"(?<=^|\.)#{{{lengths[i]}}}(?=$|\.)";
+                if (Regex.Count(pattern, match1) == 1)
+                {
+                    pattern = Regex.Replace(pattern, match1, ".");
+                    pattern = Regex.Replace(pattern, @"\.+", ".");
+                    lengths.RemoveAt(i);
+                    repeat = true;
+                    break;
+                }
+
+                string match2 = @$"(?<=^|[.?])[#?]{{{lengths[i]}}}(?=$|[.?])";
+                if (Regex.Count(pattern, match2) == 1)
+                {
+                    pattern = Regex.Replace(pattern, match2, ".");
+                    pattern = Regex.Replace(pattern, @"\.+", ".");
+                    lengths.RemoveAt(i);
+                    repeat = true;
+                    break;
+                }
+            }
+        } while (repeat);
+
+        return line;
+    }
+
+    private static (string pattern, string lengths) Split(string line) =>
+        Split(line.Split(' '));
+
+    private static (string pattern, string lengths) Split(IReadOnlyList<string> parts) =>
+        (parts[0], parts[1]);
+
+    internal static int GetArrangementCount(string line) =>
         GetArrangementCount(BuildRecord(line, false));
 
     internal static long GetUnfoldedArrangementCount(string line, int folds = 5)
@@ -52,7 +98,6 @@ public sealed class Day12Solution : ISolution
     {
         char back = pattern[0] == '#' ? '.' : '?';
         char front = pattern[^1] == '#' ? '.' : '?';
-        return $"{pattern}{back}";
         return $"{front}{pattern}{back}";
     }
 

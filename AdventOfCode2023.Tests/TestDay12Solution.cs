@@ -39,6 +39,7 @@ public sealed class TestDay12Solution
     private static readonly Dictionary<string, (int, (int, int)[])> AdditionalUnfoldedTests = new()
     {
         { "?? 1", (2, new[] { (5, 252), (2, 6), (3, 20) }) },
+        { "??. 1", (2, new[] { (5, 534), (2, 7), (3, 28) }) },
         { "???? 1,1", (3, new[] { (5, 3003) }) },
     };
 
@@ -94,7 +95,7 @@ public sealed class TestDay12Solution
     [MemberData(nameof(EnumerateExpectedUnfoldedArrangementCounts))]
     public void VerifyUnfoldedArrangementCount(string line, int expectedCount)
     {
-        long actual = Day12Solution.GetUnfoldedArrangementCount(line);
+        long actual = Day12Solution.OptimizedBruteForce(line);
 
         Assert.Equal(expectedCount, actual);
     }
