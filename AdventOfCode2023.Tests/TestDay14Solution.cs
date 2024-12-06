@@ -53,7 +53,7 @@ public sealed class TestDay14Solution
     {
         var solution = new Day14Solution();
 
-        long actual = solution.SolveSecondPuzzle(ExampleData.Lines());
+        long actual = solution.SolveSecondPuzzle(ExampleData.Lines(), _helper.AsOutput());
 
         Assert.Equal(SecondSolutionExpectedResult, actual);
     }

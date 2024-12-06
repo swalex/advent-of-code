@@ -25,6 +25,12 @@ internal static class ExtensionsForIOutput
         public void WriteLine() =>
             _helper.WriteLine(TakeLine());
 
+        public void WriteLine(string text)
+        {
+            _currentLine.Append(text);
+            _helper.WriteLine(TakeLine());
+        }
+
         private string TakeLine()
         {
             var result = _currentLine.ToString();

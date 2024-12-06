@@ -13,4 +13,7 @@ internal sealed class ConsoleOutput : IOutput
 
     public void WriteLine() =>
         Console.WriteLine();
+
+    public void WriteLine(string text) =>
+        Console.WriteLine(text);
 }

@@ -5,4 +5,6 @@ internal interface IOutput
     void Write(char c);
 
     void WriteLine();
+
+    void WriteLine(string text);
 }

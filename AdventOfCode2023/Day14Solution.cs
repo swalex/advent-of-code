@@ -16,7 +16,32 @@ public sealed class Day14Solution : ISolution
     }
 
     public long SolveSecondPuzzle(IReadOnlyList<string> input) =>
-        throw new NotImplementedException();
+        SolveSecondPuzzle(input, ConsoleOutput.Instance);
+
+    internal long SolveSecondPuzzle(IReadOnlyList<string> input, IOutput output)
+    {
+        char[,] map = BuildMap(input);
+
+        IDirection[] directions =
+        {
+            NorthDirection.Instance,
+            WestDirection.Instance,
+            SouthDirection.Instance,
+            EastDirection.Instance
+        };
+
+        for (var i = 0; i < 1000000000; i++)
+        {
+            Tilt(map, directions[i % 4]);
+            if (i % 1000000 == 0) output.WriteLine($"{i / 1000000}%");
+        }
+
+        output.WriteLine();
+
+        DumpMap(map, output);
+
+        return CalculateLoad(input, map);
+    }
 
     private static long CalculateLoad(IReadOnlyList<string> input, char[,] map)
     {
@@ -77,6 +102,125 @@ public sealed class Day14Solution : ISolution
         }
     }
 
+    internal static void Tilt(char[,] map, IDirection direction)
+    {
+        Parallel.For(0, direction.GetWidth(map), new ParallelOptions { MaxDegreeOfParallelism = 32 }, x =>
+        {
+            var space = new FreeSpace(0);
+
+            for (var y = 0; y < direction.GetHeight(map); y++)
+            {
+                char value = direction.GetValue(map, x, y);
+                if (space.ShouldSwap(value, y, out int up)) direction.Swap(map, x, y, up);
+            }
+        });
+    }
+
+    internal sealed class NorthDirection : IDirection
+    {
+        private NorthDirection()
+        {
+        }
+
+        internal static IDirection Instance { get; } = new NorthDirection();
+
+        public int GetWidth(char[,] map) =>
+            map.GetLength(0);
+
+        public int GetHeight(char[,] map) =>
+            map.GetLength(1);
+
+        public char GetValue(char[,] map, int x, int y) =>
+            map[x, y];
+
+        public void Swap(char[,] map, int x, int from, int to) =>
+            (map[x, to], map[x, from]) = (map[x, from], map[x, to]);
+    }
+
+    internal sealed class SouthDirection : IDirection
+    {
+        private SouthDirection()
+        {
+        }
+
+        internal static IDirection Instance { get; } = new SouthDirection();
+
+        public int GetWidth(char[,] map) =>
+            map.GetLength(0);
+
+        public int GetHeight(char[,] map) =>
+            map.GetLength(1);
+
+        public char GetValue(char[,] map, int x, int y) =>
+            map[x, GetHeight(map) - y - 1];
+
+        public void Swap(char[,] map, int x, int from, int to)
+        {
+            int height = GetHeight(map) - 1;
+            to = height - to;
+            from = height - from;
+            (map[x, to], map[x, from]) = (map[x, from], map[x, to]);
+        }
+    }
+
+    internal sealed class WestDirection : IDirection
+    {
+        private WestDirection()
+        {
+        }
+
+        internal static IDirection Instance { get; } = new WestDirection();
+
+        public int GetWidth(char[,] map) =>
+            map.GetLength(1);
+
+        public int GetHeight(char[,] map) =>
+            map.GetLength(0);
+
+        public char GetValue(char[,] map, int x, int y) =>
+            map[y, x];
+
+        public void Swap(char[,] map, int x, int from, int to) =>
+            (map[to, x], map[from, x]) = (map[from, x], map[to, x]);
+    }
+
+    internal sealed class EastDirection : IDirection
+    {
+        private EastDirection()
+        {
+        }
+
+        internal static IDirection Instance { get; } = new EastDirection();
+
+        public int GetWidth(char[,] map) =>
+            map.GetLength(1);
+
+        public int GetHeight(char[,] map) =>
+            map.GetLength(0);
+
+        public char GetValue(char[,] map, int x, int y) =>
+            map[GetHeight(map) - y - 1, x];
+
+        public void Swap(char[,] map, int x, int from, int to)
+        {
+            int height = GetHeight(map) - 1;
+            to = height - to;
+            from = height - from;
+            (map[to, x], map[from, x]) = (map[from, x], map[to, x]);
+        }
+    }
+
+    internal interface IDirection
+    {
+        int GetWidth(char[,] map);
+
+        int GetHeight(char[,] map);
+
+        char GetValue(char[,] map, int x, int y);
+
+        void Swap(char[,] map, int x, int from, int to);
+    }
+
     private sealed class FreeSpace
     {
         private int _start;
@@ -88,7 +232,7 @@ public sealed class Day14Solution : ISolution
             _end = _start = start;
         }
 
-        internal bool ShouldSwap(int value, int y, out int up)
+        internal bool ShouldSwap(int value, int offset, out int free)
         {
             switch (value)
             {
@@ -96,32 +240,32 @@ public sealed class Day14Solution : ISolution
                 Increase();
                 break;
             case '#':
-                Reset(y + 1);
+                Reset(offset + 1);
                 break;
             case 'O':
-                if (TryUse(out up))
+                if (TryUse(out free))
                 {
                     Increase();
                     return true;
                 }
 
-                Reset(y + 1);
+                Reset(offset + 1);
                 break;
             }
 
-            up = 0;
+            free = 0;
             return false;
         }
 
         private void Increase() =>
             _end++;
 
-        private void Reset(int y) =>
-            _start = _end = y;
+        private void Reset(int offset) =>
+            _start = _end = offset;
 
-        private bool TryUse(out int y)
+        private bool TryUse(out int offset)
         {
-            y = _start;
+            offset = _start;
             if (_start == _end) return false;
 
             _start++;
