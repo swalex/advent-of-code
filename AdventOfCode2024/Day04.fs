@@ -2,50 +2,58 @@
 
 open Vector
 
-let private xmas = ['X'; 'M'; 'A'; 'S']
+let private xmas = [| 'X'; 'M'; 'A'; 'S' |]
+let private x_mas = [| 'M'; 'A'; 'S' |]
 
-let private isMatch (input: char[,]) (offset: Vector) (direction: Vector) : bool =
-    [0..3]
-    |> Seq.forall (fun i -> input.[offset.Y + i * direction.Y, offset.X + i * direction.X] = xmas.[i])
+let private isMatch (input: char[,]) (pattern: char[]) (offset: Vector) (direction: Vector) : bool =
+    [0..pattern.Length - 1]
+    |> Seq.forall (fun i -> input.[offset.Y + i * direction.Y, offset.X + i * direction.X] = pattern.[i])
 
-let private horizontalIndices (input: char[,]) (direction: Vector) : seq<int> =
+let private horizontalIndices (input: char[,]) (pattern: char[]) (direction: Vector) : seq<int> =
     if direction.X = 0 then
         seq { 0..input.GetLength(1) - 1 }
     else if direction.X > 0 then
-        seq { 0..input.GetLength(1) - 4 }
+        seq { 0..input.GetLength(1) - pattern.Length }
     else
-        seq { input.GetLength(1) - 1..-1..3 }
+        seq { input.GetLength(1) - 1..-1..pattern.Length - 1 }
 
-let private verticalIndices (input: char[,]) (direction: Vector) : seq<int> =
+let private verticalIndices (input: char[,]) (pattern: char[]) (direction: Vector) : seq<int> =
     if direction.Y = 0 then
         seq { 0..input.GetLength(0) - 1 }
     else if direction.Y > 0 then
-        seq { 0..input.GetLength(0) - 4 }
+        seq { 0..input.GetLength(0) - pattern.Length }
     else
-        seq { input.GetLength(0) - 1..-1..3 }
+        seq { input.GetLength(0) - 1..-1..pattern.Length - 1 }
 
 let private singleDirection = [-1; 0; 1]
 
-let private directions =
+let private allDirections =
     singleDirection
     |> Seq.collect (fun y -> singleDirection |> Seq.map (fun x -> create x y))
     |> Seq.filter (fun v -> v <> create 0 0)
 
-let private countMatches (input: char[,]) (direction: Vector) : int =
-    verticalIndices input direction
+let private getMatches (input: char[,]) (pattern: char[]) (direction: Vector) : seq<Vector> =
+    verticalIndices input pattern direction
     |> Seq.collect (fun y ->
-        horizontalIndices input direction
+        horizontalIndices input pattern direction
         |> Seq.map (fun x -> create x y))
-    |> Seq.filter (fun offset -> isMatch input offset direction)
-    |> Seq.length
-
-let private countAllMatches (input: char[,]) : int =
-    directions
-    |> Seq.map (fun direction -> countMatches input direction)
-    |> Seq.sum
+    |> Seq.filter (fun offset -> isMatch input pattern offset direction)
 
 let solution1 (input: char[,]): int =
-    countAllMatches input
+    allDirections
+    |> Seq.map (fun direction -> getMatches input xmas direction)
+    |> Seq.concat
+    |> Seq.length
 
 let solution2 (input: char[,]): int =
-    0
+    let slash =
+        [create 1 -1; create -1 1]
+        |> Seq.collect (fun v -> getMatches input x_mas v |> Seq.map (fun m -> Vector.add m v))
+    let backslash =
+        [create 1 1; create -1 -1]
+        |> Seq.collect (fun v -> getMatches input x_mas v |> Seq.map (fun m -> Vector.add m v))
+        |> Set.ofSeq
+
+    slash
+    |> Seq.filter (fun v -> backslash |> Seq.exists (fun v' -> v = v'))
+    |> Seq.length
