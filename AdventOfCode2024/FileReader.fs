@@ -15,7 +15,7 @@ type Input =
     | Success of string array array
     | NotFound of string
 
-let readInputMatrix(day: int)(kind: Kind): Input =
+let readInputMatrix (day: int) (kind: Kind): Input =
     let kindAsString = kindAsString kind
     let path = sprintf "input/%02d/%s.txt" day kindAsString
     if File.Exists(path) then

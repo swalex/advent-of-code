@@ -2,13 +2,13 @@
 open SolutionsManager
 open StringExtensions
 
-let computeSolutionTimed(solution: string array array -> int)(input: string array array): int * int64 =
+let computeSolutionTimed (solution: string array array -> int)(input: string array array): int * int64 =
     let stopwatch = System.Diagnostics.Stopwatch.StartNew()
     let result = solution input
     let elapsed = stopwatch.ElapsedMilliseconds
     result, elapsed
 
-let computeSolutionByKind(solution: Solution, kind: Kind) =
+let computeSolutionByKind (solution: Solution, kind: Kind) =
     let data = FileReader.readInputMatrix solution.Day kind
     let kindName = kindAsString kind |> capitalize
     match data with
@@ -20,7 +20,7 @@ let computeSolutionByKind(solution: Solution, kind: Kind) =
         let result2, elapsed2 = computeSolutionTimed solution.Solution2 input
         printfn "%5s solution 2: %d (in %d ms)" kindName result2 elapsed2
 
-let computeSolution(solution: Solution) =
+let computeSolution (solution: Solution) =
     computeSolutionByKind(solution, Test)
     computeSolutionByKind(solution, Input)
 
