@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Day01.fs" />
+    <Compile Include="FileReader.fs" />
+    <Compile Include="SolutionsManager.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="input\01\" />
+    <Folder Include="input\" />
+  </ItemGroup>
+
+</Project>
