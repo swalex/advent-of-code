@@ -1,6 +1,6 @@
 ﻿module Day01
 
-let splitToColumns (input: int array array): int array * int array =
+let private splitToColumns (input: int array array): int array * int array =
     input
     |> Array.fold (fun (left, right) row -> (row.[0]::left, row.[1]::right)) ([], [])
     |> fun (left, right) -> (left |> List.toArray, right |> List.toArray)

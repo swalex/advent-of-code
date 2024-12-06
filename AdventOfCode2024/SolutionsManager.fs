@@ -9,10 +9,10 @@ type Solution = {
     Solution2: string array array -> int
 }
 
-let toIntMatrix (matrix: string array array) : int array array =
+let private toIntMatrix (matrix: string array array) : int array array =
     matrix |> Array.map (Array.map int)
 
-let wrapSolution (method: MethodInfo) : string array array -> int =
+let private wrapSolution (method: MethodInfo) : string array array -> int =
     fun input ->
         let paramType = method.GetParameters().[0].ParameterType
         let convertedInput =
@@ -22,7 +22,7 @@ let wrapSolution (method: MethodInfo) : string array array -> int =
                 box input
         method.Invoke(null, [| convertedInput |]) :?> int
 
-let discoverSolutions () =
+let private discoverSolutions () =
     let assembly = Assembly.GetExecutingAssembly()
     let pattern = Regex("^Day(\d{2})$")
     assembly.GetTypes()
@@ -33,8 +33,6 @@ let discoverSolutions () =
                 let solution1 = t.GetMethod("solution1", BindingFlags.Static ||| BindingFlags.Public)
                 let solution2 = t.GetMethod("solution2", BindingFlags.Static ||| BindingFlags.Public)
                 if solution1 <> null && solution2 <> null then
-                    
-
                     Some {
                         Day = day
                         Solution1 = wrapSolution solution1
