@@ -1,5 +1,6 @@
 ﻿open FileReader
 open SolutionsManager
+open StringExtensions
 
 let computeSolutionTimed(solution: string array array -> int)(input: string array array): int * int64 =
     let stopwatch = System.Diagnostics.Stopwatch.StartNew()
@@ -7,21 +8,21 @@ let computeSolutionTimed(solution: string array array -> int)(input: string arra
     let elapsed = stopwatch.ElapsedMilliseconds
     result, elapsed
 
-let computeSolutionWithInput(solution: Solution, data: Input) =
+let computeSolutionByKind(solution: Solution, kind: Kind) =
+    let data = FileReader.readInputMatrix solution.Day kind
+    let kindName = kindAsString kind |> capitalize
     match data with
     | Input.NotFound message ->
         printfn "%s" message
     | Input.Success input ->
         let result1, elapsed1 = computeSolutionTimed solution.Solution1 input
-        printfn "Solution 1: %d (in %d ms)" result1 elapsed1
+        printfn "%5s solution 1: %d (in %d ms)" kindName result1 elapsed1
         let result2, elapsed2 = computeSolutionTimed solution.Solution2 input
-        printfn "Solution 2: %d (in %d ms)" result2 elapsed2
+        printfn "%5s solution 2: %d (in %d ms)" kindName result2 elapsed2
 
 let computeSolution(solution: Solution) =
-    let testInput = FileReader.readInputMatrix solution.Day Test
-    computeSolutionWithInput(solution, testInput)
-    let actualInput = FileReader.readInputMatrix solution.Day Input
-    computeSolutionWithInput(solution, actualInput)
+    computeSolutionByKind(solution, Test)
+    computeSolutionByKind(solution, Input)
 
 [<EntryPoint>]
 let main argv =

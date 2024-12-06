@@ -9,7 +9,20 @@ type Solution = {
     Solution2: string array array -> int
 }
 
-let discoverSolutions() =
+let toIntMatrix (matrix: string array array) : int array array =
+    matrix |> Array.map (Array.map int)
+
+let wrapSolution (method: MethodInfo) : string array array -> int =
+    fun input ->
+        let paramType = method.GetParameters().[0].ParameterType
+        let convertedInput =
+            if paramType = typeof<int array array> then
+                box (toIntMatrix input)
+            else
+                box input
+        method.Invoke(null, [| convertedInput |]) :?> int
+
+let discoverSolutions () =
     let assembly = Assembly.GetExecutingAssembly()
     let pattern = Regex("^Day(\d{2})$")
     assembly.GetTypes()
@@ -20,10 +33,12 @@ let discoverSolutions() =
                 let solution1 = t.GetMethod("solution1", BindingFlags.Static ||| BindingFlags.Public)
                 let solution2 = t.GetMethod("solution2", BindingFlags.Static ||| BindingFlags.Public)
                 if solution1 <> null && solution2 <> null then
+                    
+
                     Some {
                         Day = day
-                        Solution1 = (fun input -> solution1.Invoke(null, [| box input |]) :?> int)
-                        Solution2 = (fun input -> solution2.Invoke(null, [| box input |]) :?> int)
+                        Solution1 = wrapSolution solution1
+                        Solution2 = wrapSolution solution2
                     }
                 else
                     printfn "Missing solution methods for day %d." day

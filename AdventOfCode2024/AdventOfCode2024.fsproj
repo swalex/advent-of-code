@@ -10,11 +10,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="Day01.fs" />
+    <Compile Include="StringExtensions.fs" />
     <Compile Include="FileReader.fs" />
     <Compile Include="SolutionsManager.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
 </Project>
