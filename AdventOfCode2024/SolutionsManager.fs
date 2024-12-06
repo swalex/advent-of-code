@@ -17,8 +17,8 @@ let discoverSolutions() =
             match pattern.Match(t.Name) with
             | m when m.Success ->
                 let day = int m.Groups.[1].Value
-                let solution1 = t.GetMethod("Solution1", BindingFlags.Static ||| BindingFlags.Public)
-                let solution2 = t.GetMethod("Solution2", BindingFlags.Static ||| BindingFlags.Public)
+                let solution1 = t.GetMethod("solution1", BindingFlags.Static ||| BindingFlags.Public)
+                let solution2 = t.GetMethod("solution2", BindingFlags.Static ||| BindingFlags.Public)
                 if solution1 <> null && solution2 <> null then
                     Some {
                         Day = day

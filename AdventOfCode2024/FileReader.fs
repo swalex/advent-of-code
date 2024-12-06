@@ -17,7 +17,7 @@ type Input =
 
 let readInputMatrix(day: int)(kind: Kind): Input =
     let kindAsString = kindAsString kind
-    let path = sprintf "input/day%02d/%s.txt" day kindAsString
+    let path = sprintf "input/%02d/%s.txt" day kindAsString
     if File.Exists(path) then
         let lines =
             File.ReadAllLines(path)

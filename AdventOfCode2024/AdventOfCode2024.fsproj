@@ -6,15 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="input\**\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Day01.fs" />
     <Compile Include="FileReader.fs" />
     <Compile Include="SolutionsManager.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="input\01\" />
-    <Folder Include="input\" />
-  </ItemGroup>
+  <ItemGroup />
 
 </Project>

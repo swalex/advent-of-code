@@ -11,7 +11,6 @@ let computeSolutionWithInput(solution: Solution, data: Input) =
     match data with
     | Input.NotFound message ->
         printfn "%s" message
-        printfn "No input data available for day %d." solution.Day
     | Input.Success input ->
         let result1, elapsed1 = computeSolutionTimed solution.Solution1 input
         printfn "Solution 1: %d (in %d ms)" result1 elapsed1
@@ -22,7 +21,7 @@ let computeSolution(solution: Solution) =
     let testInput = FileReader.readInputMatrix solution.Day Test
     computeSolutionWithInput(solution, testInput)
     let actualInput = FileReader.readInputMatrix solution.Day Input
-    computeSolutionWithInput(solution, testInput)
+    computeSolutionWithInput(solution, actualInput)
 
 [<EntryPoint>]
 let main argv =
