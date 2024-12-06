@@ -6,10 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Vector.fs" />
     <Compile Include="DayXX.fs" />
     <Compile Include="Day01.fs" />
     <Compile Include="Day02.fs" />
     <Compile Include="Day03.fs" />
+    <Compile Include="Day04.fs" />
     <Compile Include="StringExtensions.fs" />
     <Compile Include="FileReader.fs" />
     <Compile Include="SolutionsManager.fs" />
