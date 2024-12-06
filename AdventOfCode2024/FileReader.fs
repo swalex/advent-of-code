@@ -1,6 +1,5 @@
 ﻿module FileReader
 
-open System
 open System.IO
 
 type Kind =
@@ -12,17 +11,13 @@ let kindAsString = function
     | Test -> "test"
 
 type Input =
-    | Success of string array array
+    | Success of string array
     | NotFound of string
 
-let readInputMatrix (day: int) (kind: Kind): Input =
+let readInputMatrix (day: int) (kind: Kind) : Input =
     let kindAsString = kindAsString kind
     let path = sprintf "input/%02d/%s.txt" day kindAsString
     if File.Exists(path) then
-        let lines =
-            File.ReadAllLines(path)
-            |> Seq.map (fun line -> line.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-            |> Seq.toArray
-        Success lines
+        Success (File.ReadAllLines(path))
     else
         NotFound (sprintf "%s file for day %d not found." kindAsString day)

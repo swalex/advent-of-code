@@ -2,7 +2,7 @@
 open SolutionsManager
 open StringExtensions
 
-let computeSolutionTimed (solution: string array array -> int)(input: string array array): int * int64 =
+let computeSolutionTimed (solution: string array -> int)(input: string array) : int * int64 =
     let stopwatch = System.Diagnostics.Stopwatch.StartNew()
     let result = solution input
     let elapsed = stopwatch.ElapsedMilliseconds

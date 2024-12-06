@@ -5,19 +5,28 @@ open System.Text.RegularExpressions
 
 type Solution = {
     Day: int
-    Solution1: string array array -> int
-    Solution2: string array array -> int
+    Solution1: string array -> int
+    Solution2: string array -> int
 }
 
 let private toIntMatrix (matrix: string array array) : int array array =
     matrix |> Array.map (Array.map int)
 
-let private wrapSolution (method: MethodInfo) : string array array -> int =
+let private toStringMatrix (input: string array) : string array array =
+    input
+    |> Seq.map (fun line -> line.Split(' ', System.StringSplitOptions.RemoveEmptyEntries))
+    |> Seq.toArray
+
+let private wrapSolution (method: MethodInfo) : string array -> int =
     fun input ->
         let paramType = method.GetParameters().[0].ParameterType
         let convertedInput =
             if paramType = typeof<int array array> then
-                box (toIntMatrix input)
+                box (toStringMatrix input |> toIntMatrix)
+            else if paramType = typeof<string array array> then
+                box (toStringMatrix input)
+            else if paramType = typeof<string> then
+                box (String.concat "" input)
             else
                 box input
         method.Invoke(null, [| convertedInput |]) :?> int
